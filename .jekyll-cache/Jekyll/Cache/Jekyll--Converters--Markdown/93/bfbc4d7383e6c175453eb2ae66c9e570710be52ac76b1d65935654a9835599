@@ -1,0 +1,5 @@
+I"¥<div class="paragraph">
+<p>This is a sample page composed in AsciiDoc.
+Jekyll converts it to HTML using <a href="http://asciidoctor.org">Asciidoctor</a>.</p>
+</div>
+:ET
