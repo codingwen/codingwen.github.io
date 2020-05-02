@@ -1,0 +1,13 @@
+= Sample Page
+:page-title: "sample asciidoc"
+:page-layout: post
+:page-permalink: /sample/
+:page-date:   2020-05-02 00:07:40 +0800
+:page-categories: jekyll update
+:url-asciidoctor: http://asciidoctor.org
+
+This is a sample page composed in AsciiDoc.
+Jekyll converts it to HTML using {url-asciidoctor}[Asciidoctor].
+
+[source,ruby]
+puts "Hello, World!"
