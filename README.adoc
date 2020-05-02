@@ -1,3 +1,7 @@
 = Welcome
 
-welcome to my github
+还是采用Jekyll搭建个人blog好了，毕竟github也是支持的。
+
+因为希望能够采用asciidoc写作，搜到过Antora，经过一番研究，发现它用作文档写作和归集还是不错的，但是作为blog就不合适了。
+
+而Jekyll生态比较丰富，也有asciidoc插件提供。
