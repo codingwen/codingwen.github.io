@@ -1,0 +1,33 @@
+= Jekyll Handbook
+:page-title: "Jekyll Handbook"
+:page-layout: post
+:page-permalink: jekyll-handbook.html
+:page-date:   2020-05-03 18:30:40 +0800
+:page-categories: jekyll handbook
+:url-jekyll: https://jekyllrb.com/
+
+This is a {url-jekyll}[jekyll] cheetsheet.
+
+== Run
+
+[source, shell]
+----
+bundle exec jekyll serve
+# set port
+bundle exec jekyll serve --port 1234
+
+# render draft pages
+bundle exec jekyll serve --drafts
+
+# preparing publish
+bundle exec jekyll build
+----
+
+== Theme
+
+[source, shell]
+----
+bundle info --path minima
+----
+
+Then you can copy theme files you wanted to jekyll site directory.

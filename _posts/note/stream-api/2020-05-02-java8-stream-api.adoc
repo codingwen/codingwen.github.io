@@ -1,0 +1,41 @@
+= Stream API
+:page-title: "Java8 Stream API"
+:page-layout: post
+:page-permalink: java8-stream-api.html
+:page-date:   2020-05-02 07:30:40 +0800
+:page-categories: java8 stream
+:official: link:https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html[官方lambda文档, window="_blank"]
+
+更多资料参考{official}
+
+////
+概览 
+////
+include::_chp01.adoc[leveloffset=+1]
+
+////
+常用操作 
+////
+include::_chp02.adoc[leveloffset=+1]
+
+////
+构造方法 
+////
+include::_chp03.adoc[leveloffset=+1]
+
+////
+Numberic
+////
+include::_chp04.adoc[leveloffset=+1]
+
+[#appxa, reftext=附录A]
+[appendix]
+include::_appdx01.adoc[leveloffset=+1]
+
+[#appxb, reftext=附录B]
+[appendix]
+include::_appdx02.adoc[leveloffset=+1]
+
+[#appxc, reftext=附录C]
+[appendix]
+include::_appdx03.adoc[leveloffset=+1]
