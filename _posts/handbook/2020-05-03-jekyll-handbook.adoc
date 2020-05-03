@@ -31,3 +31,11 @@ bundle info --path minima
 ----
 
 Then you can copy theme files you wanted to jekyll site directory.
+
+== Favicon
+
+[source, html]
+----
+<link rel="shortcut icon" type="image/png" href="/favicon.png">  <1>
+----
+<1> add this to ``_includes/head.html``
