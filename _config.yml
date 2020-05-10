@@ -29,6 +29,7 @@ logo: favicon.png
 twitter_username: codingwen
 github_username:  codingwen
 
+
 # Build settings
 theme: minima
 plugins:
