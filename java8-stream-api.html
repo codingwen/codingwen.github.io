@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=a89b43b92cb28ef1be8aa3a8bc28383c8a66bafc" media="screen" type="text/css">
+    <link rel="stylesheet" href="/assets/css/print.css" media="print" type="text/css">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Java8 Stream API | codingwen’s land</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Java8 Stream API" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="更多资料参考官方lambda文档" />
+<meta property="og:description" content="更多资料参考官方lambda文档" />
+<link rel="canonical" href="http://ikoding.net/java8-stream-api.html" />
+<meta property="og:url" content="http://ikoding.net/java8-stream-api.html" />
+<meta property="og:site_name" content="codingwen’s land" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-01T23:30:40+00:00" />
+<script type="application/ld+json">
+{"description":"更多资料参考官方lambda文档","@type":"BlogPosting","url":"http://ikoding.net/java8-stream-api.html","headline":"Java8 Stream API","dateModified":"2020-05-01T23:30:40+00:00","datePublished":"2020-05-01T23:30:40+00:00","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://ikoding.net/favicon.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"http://ikoding.net/java8-stream-api.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <a href="http://ikoding.net/">
+          <h1>codingwen's land</h1>
+        </a>
+        <h2>A man who never makes mistake, wil never make anything.</h2>
+        
+          <a href="https://github.com/codingwen/codingwen.github.io" class="button"><small>View project on</small> GitHub</a>
+        
+        
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>更多资料参考<a href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html" target="_blank" rel="noopener">官方lambda文档</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="概览">概览</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>集合在Java中使用得十分频繁，很多时候都在循环-处理这样的流程。以一个操作数据的常见SQL为例<code>SELECT id, MAX(value) from transactions</code>, 期望结果是显而易见的，如果使用集合相关API操作的话，少不了循环-排序-取值。于是，从JDK8开始，引入Stream API用于简化和强化集合操作。
+另外，针对真正非常大的集合数据，如何高效地处理？如果能充分利用计算机的多核心的话，就能够达到，但是曾经使用Java编写并行代码，困难且易错。</p>
+</div>
+<div class="paragraph">
+<p>以一个常见的集合处理场景为例：从一组交易记录(transactions)中，找出类型为grocery的记录，并且按交易值倒序的那些记录。</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. 传统方式</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span>
+<span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">Transaction</span><span class="tok-o">&gt;</span> <span class="tok-n">groceryTransactions</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-n">Arraylist</span><span class="tok-o">&lt;&gt;();</span>
+<span class="tok-k">for</span><span class="tok-o">(</span><span class="tok-n">Transaction</span> <span class="tok-n">t</span><span class="tok-o">:</span> <span class="tok-n">transactions</span><span class="tok-o">){</span>
+  <span class="tok-k">if</span><span class="tok-o">(</span><span class="tok-n">t</span><span class="tok-o">.</span><span class="tok-na">getType</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">Transaction</span><span class="tok-o">.</span><span class="tok-na">GROCERY</span><span class="tok-o">){</span>
+    <span class="tok-n">groceryTransactions</span><span class="tok-o">.</span><span class="tok-na">add</span><span class="tok-o">(</span><span class="tok-n">t</span><span class="tok-o">);</span>
+  <span class="tok-o">}</span>
+<span class="tok-o">}</span>
+<span class="tok-n">Collections</span><span class="tok-o">.</span><span class="tok-na">sort</span><span class="tok-o">(</span><span class="tok-n">groceryTransactions</span><span class="tok-o">,</span> <span class="tok-k">new</span> <span class="tok-n">Comparator</span><span class="tok-o">(){</span>
+  <span class="tok-kd">public</span> <span class="tok-kt">int</span> <span class="tok-nf">compare</span><span class="tok-o">(</span><span class="tok-n">Transaction</span> <span class="tok-n">t1</span><span class="tok-o">,</span> <span class="tok-n">Transaction</span> <span class="tok-n">t2</span><span class="tok-o">){</span>
+    <span class="tok-k">return</span> <span class="tok-n">t2</span><span class="tok-o">.</span><span class="tok-na">getValue</span><span class="tok-o">().</span><span class="tok-na">compareTo</span><span class="tok-o">(</span><span class="tok-n">t1</span><span class="tok-o">.</span><span class="tok-na">getValue</span><span class="tok-o">());</span>
+  <span class="tok-o">}</span>
+<span class="tok-o">});</span>
+<span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">Integer</span><span class="tok-o">&gt;</span> <span class="tok-n">transactionIds</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-n">ArrayList</span><span class="tok-o">&lt;&gt;();</span>
+<span class="tok-k">for</span><span class="tok-o">(</span><span class="tok-n">Transaction</span> <span class="tok-n">t</span><span class="tok-o">:</span> <span class="tok-n">groceryTransactions</span><span class="tok-o">){</span>
+  <span class="tok-n">transactionsIds</span><span class="tok-o">.</span><span class="tok-na">add</span><span class="tok-o">(</span><span class="tok-n">t</span><span class="tok-o">.</span><span class="tok-na">getId</span><span class="tok-o">());</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Stream API方式</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">Integer</span><span class="tok-o">&gt;</span> <span class="tok-n">transactionsIds</span> <span class="tok-o">=</span>
+    <span class="tok-n">transactions</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">()</span>
+                <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">t</span> <span class="tok-o">-&gt;</span> <span class="tok-n">t</span><span class="tok-o">.</span><span class="tok-na">getType</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">Transaction</span><span class="tok-o">.</span><span class="tok-na">GROCERY</span><span class="tok-o">)</span>
+                <span class="tok-o">.</span><span class="tok-na">sorted</span><span class="tok-o">(</span><span class="tok-n">comparing</span><span class="tok-o">(</span><span class="tok-n">Transaction</span><span class="tok-o">::</span><span class="tok-n">getValue</span><span class="tok-o">).</span><span class="tok-na">reversed</span><span class="tok-o">())</span>
+                <span class="tok-o">.</span><span class="tok-na">map</span><span class="tok-o">(</span><span class="tok-n">Transaction</span><span class="tok-o">::</span><span class="tok-n">getId</span><span class="tok-o">)</span>
+                <span class="tok-o">.</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toList</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>上面代码处理流程可以通过下图表示</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/EQ5G8dt9Kf.png" alt="流程示意图">
+</div>
+</div>
+<div class="paragraph">
+<p>首先，从list中通过<code>stream()</code>得到一个stream，接下来，通过一组操作(filter,sorted,map,collect)连接成一个处理的pipeline，可以被当作对数据的一个query。</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 3. 并行化处理</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">Integer</span><span class="tok-o">&gt;</span> <span class="tok-n">transactionsIds</span> <span class="tok-o">=</span>
+    <span class="tok-n">transactions</span><span class="tok-o">.</span><span class="tok-na">parallelStream</span><span class="tok-o">()</span>                                       <b class="conum">(1)</b>
+                <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">t</span> <span class="tok-o">-&gt;</span> <span class="tok-n">t</span><span class="tok-o">.</span><span class="tok-na">getType</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">Transaction</span><span class="tok-o">.</span><span class="tok-na">GROCERY</span><span class="tok-o">)</span>
+                <span class="tok-o">.</span><span class="tok-na">sorted</span><span class="tok-o">(</span><span class="tok-n">comparing</span><span class="tok-o">(</span><span class="tok-n">Transaction</span><span class="tok-o">::</span><span class="tok-n">getValue</span><span class="tok-o">).</span><span class="tok-na">reversed</span><span class="tok-o">())</span>
+                <span class="tok-o">.</span><span class="tok-na">map</span><span class="tok-o">(</span><span class="tok-n">Transaction</span><span class="tok-o">::</span><span class="tok-n">getId</span><span class="tok-o">)</span>
+                <span class="tok-o">.</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toList</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>通过<code>parallelStream()</code>就可以对stream进行并行处理</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="定义definition">定义(Definition)</h3>
+<div class="paragraph">
+<p>那么，通过上面的例子，可以讲讲什么是Stream。字面的定义是：</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>a sequence of elements from a source that supports aggregate operations</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>如图</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/dVeT84F2cu.png" alt="dVeT84F2cu">
+</div>
+</div>
+<div class="paragraph">
+<p>这个定义包括</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Sequence of elements</strong>: A stream provides an interface to a sequenced set of values of a specific element type. However, streams don’t actually store elements; they are computed on demand.</p>
+</li>
+<li>
+<p><strong>Source</strong>: Streams consume from a data-providing source such as collections, arrays, or I/O resources</p>
+</li>
+<li>
+<p><strong>Aggregate operations</strong>: Streams support SQL-like operations and common operations from functional programing languages, such as filter, map, reduce, find, match, sorted, and so on.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>另外，stream操作有两个基本特征是集合所不具备的</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Pipelining</strong>: Many stream operations return a stream themselves. This allows operations to be chained to form a larger pipeline. This enables certain optimizations, such as laziness and short-circuiting, which we explore later.</p>
+</li>
+<li>
+<p><strong>Internal iteration</strong>: In contrast to collections, which are iterated explicitly (external iteration), stream operations do the iteration behind the scenes for you.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>下图展示了更多地细节</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/942774bc89954a1569bb.png" alt="942774bc89954a1569bb">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="对比stream-vs-collection">对比(Stream vs Collection)</h3>
+<div class="paragraph">
+<p>那么，stream和collection的差别是什么呢？简要来说，<mark>collections are about data and streams are about computations</mark>。</p>
+</div>
+<div class="paragraph">
+<p>不那么严谨地说，Collection要求用户自己进行迭代操作(所谓external iteration)；</p>
+</div>
+<div class="paragraph">
+<p>而stream使用internal iteration，使用者只需要提供各种function告诉stream要做什么。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="api概览">API概览</h3>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/1eb8aa35c8e15253daad.png" alt="1eb8aa35c8e15253daad">
+</div>
+<div class="title">Figure 1. stream api overview</div>
+</div>
+<div class="paragraph">
+<p>可以看到Collectors和StreamSupport是两个工具类。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="包结构">包结构</h3>
+<div class="paragraph">
+<p>主要的类和接口都位于 java.util.stream包中，结构图如下</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/c76421d3042e966a65e3.png" alt="c76421d3042e966a65e3">
+</div>
+<div class="title">Figure 2. java.util.stream包</div>
+</div>
+<div class="paragraph">
+<p>可以看到位于顶端的是一个接口BaseStream和一个抽象类PipelineHelper，它们定下了stream的基本逻辑：
+Stream持有数据结构，PipelineHelper用于数据处理</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/115c3dad00c3bdd61485.png" alt="115c3dad00c3bdd61485">
+</div>
+<div class="title">Figure 3. BaseStream</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/ascimgs/streamapi/0ee9bd6c126f39f6faa8.png" alt="0ee9bd6c126f39f6faa8">
+</div>
+<div class="title">Figure 4. PipelineHelper(这是一个non-public的类)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="常用操作stream-operations">常用操作(Stream operations)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>根据<a href="https://docs.oracle.com/javase/8/docs/api/index.html?java/util/stream/package-tree.html" target="_blank" rel="noopener">官方API文档</a>，可以看到stream支持的所有操作，列举在<a href="#appxa">附录A</a>中。</p>
+</div>
+<div class="paragraph">
+<p>这些操作分为两种类型：intermediate和terminal。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>intermediate: 各种能将返回类型为stream的操作连在一起形成pipeline的操作，比如filter,sorted,map,distinct等，
+重要的是，intermediate并不会立即对数据做任何操作，这被称为<mark>lazy</mark></p>
+</li>
+<li>
+<p>terminal: 会关闭stream的操作被称为terminal。它们从一个pipeline产生一个结果，比如List, Integer，甚至void。只有terminal操作被调用的时候，一个pipeline才会进行真正的处理。</p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="title">Example 4. 示例说明</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">Integer</span><span class="tok-o">&gt;</span> <span class="tok-n">numbers</span> <span class="tok-o">=</span> <span class="tok-n">Arrays</span><span class="tok-o">.</span><span class="tok-na">asList</span><span class="tok-o">(</span><span class="tok-mi">1</span><span class="tok-o">,</span> <span class="tok-mi">2</span><span class="tok-o">,</span> <span class="tok-mi">3</span><span class="tok-o">,</span> <span class="tok-mi">4</span><span class="tok-o">,</span> <span class="tok-mi">5</span><span class="tok-o">,</span> <span class="tok-mi">6</span><span class="tok-o">,</span> <span class="tok-mi">7</span><span class="tok-o">,</span> <span class="tok-mi">8</span><span class="tok-o">);</span>
+<span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">Integer</span><span class="tok-o">&gt;</span> <span class="tok-n">twoEvenSquares</span> <span class="tok-o">=</span>
+    <span class="tok-n">numbers</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">()</span>
+       <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">n</span> <span class="tok-o">-&gt;</span> <span class="tok-o">{</span>
+                <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-s">&quot;filtering &quot;</span> <span class="tok-o">+</span> <span class="tok-n">n</span><span class="tok-o">);</span>
+                <span class="tok-k">return</span> <span class="tok-n">n</span> <span class="tok-o">%</span> <span class="tok-mi">2</span> <span class="tok-mi">0</span><span class="tok-o">;</span>
+              <span class="tok-o">})</span>
+       <span class="tok-o">.</span><span class="tok-na">map</span><span class="tok-o">(</span><span class="tok-n">n</span> <span class="tok-o">-&gt;</span> <span class="tok-o">{</span>
+                <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-s">&quot;mapping &quot;</span> <span class="tok-o">+</span> <span class="tok-n">n</span><span class="tok-o">);</span>
+                <span class="tok-k">return</span> <span class="tok-n">n</span> <span class="tok-o">*</span> <span class="tok-n">n</span><span class="tok-o">;</span>
+              <span class="tok-o">})</span>
+       <span class="tok-o">.</span><span class="tok-na">limit</span><span class="tok-o">(</span><span class="tok-mi">2</span><span class="tok-o">)</span>                                               <b class="conum">(1)</b>
+       <span class="tok-o">.</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toList</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>limit(2)是一个<code>short-circuiting</code>；这样，仅仅处理部分stream，而无需所有。类似Boolean表达式中的AND操作符：只要一个expression为false，立刻返回，而无需计算剩余表达式。</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="screen"><span></span>打印结果
+
+filtering 1
+filtering 2
+mapping 2
+filtering 3
+filtering 4
+mapping 4</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>粗略来说，stream的操作属于filter-map-reduce模型，可以视作类似于fork-join。所以stream的操作中，组成pipeline的基本操作包括filter,find,match等操作属于intermediate，而forEach,max,toList等操作属于terminal。stream属于何种类别，都在附表A中进行了标注。</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="intermediate操作">intermediate操作</h3>
+<div class="sect3">
+<h4 id="filtering过滤">Filtering(过滤)</h4>
+<div class="paragraph">
+<p>包括<mark>filter</mark>, <mark>distinct</mark>, <mark>limit</mark>和<mark>skip</mark>这4个操作</p>
+</div>
+<div class="paragraph">
+<p>这一类操作对stream进行过滤之后，仍然返回stream。例如</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 5. filtering示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">,</span><span class="tok-s">&quot;three&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">distinct</span><span class="tok-o">()</span>                                      <b class="conum">(1)</b>
+  <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">s</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-na">contains</span><span class="tok-o">(</span><span class="tok-s">&quot;o&quot;</span><span class="tok-o">))</span>                    <b class="conum">(2)</b>
+  <span class="tok-o">.</span><span class="tok-na">skip</span><span class="tok-o">(</span><span class="tok-mi">1</span><span class="tok-o">)</span>                                         <b class="conum">(3)</b>
+  <span class="tok-o">.</span><span class="tok-na">limit</span><span class="tok-o">(</span><span class="tok-mi">1</span><span class="tok-o">)</span>                                        <b class="conum">(4)</b>
+  <span class="tok-o">.</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><strong>distinct</strong>: Takes a predicate (java.util.function.Predicate) as an argument and returns a stream including all elements that match the given predicate</p>
+</li>
+<li>
+<p><strong>filter(Predicate)</strong>: Returns a stream with unique elements (according to the implementation of equals for a stream element)</p>
+</li>
+<li>
+<p><strong>skip(n)</strong>: Returns a stream that is no longer than the given size n</p>
+</li>
+<li>
+<p><strong>limit(n)</strong>: Returns a stream with the first n number of elements discarded</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="sorting排序">Sorting(排序)</h4>
+<div class="paragraph">
+<p>对stream元素进行排序，包括两个方法</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Stream&lt;T&gt; sorted()</code>: sorted stream according to natural order</p>
+</li>
+<li>
+<p><code>Stream&lt;T&gt; sorted(Comparator&lt;? super T&gt; comparator)</code>: sorted according to the provided Comparator</p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="title">Example 6. sorting示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">,</span><span class="tok-s">&quot;three&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">sorted</span><span class="tok-o">()</span>                                        <b class="conum">(1)</b>
+  <span class="tok-o">.</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span>
+
+<span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">,</span><span class="tok-s">&quot;three&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">sorted</span><span class="tok-o">((</span><span class="tok-n">o1</span><span class="tok-o">,</span> <span class="tok-n">o2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">o1</span><span class="tok-o">.</span><span class="tok-na">compareTo</span><span class="tok-o">(</span><span class="tok-n">o2</span><span class="tok-o">))</span>            <b class="conum">(2)</b>
+  <span class="tok-o">.</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>自然排序</p>
+</li>
+<li>
+<p>提供排序算法</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="mapping映射">Mapping(映射)</h4>
+<div class="paragraph">
+<p>映射操作分为map和flatMap两类，每种类型都包括3个快捷操作映射到Double,Long和Int类型。各自的方法签名如下：</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">map</dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T,? extends R&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>DoubleStream mapToDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>IntStream mapToInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>LongStream mapToLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">flatmap</dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;R&gt; Stream&lt;R&gt; flatMap(Function&lt;? super T,? extends Stream&lt;? extends R&gt;&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>DoubleStream flatMapToDouble(Function&lt;? super T,? extends DoubleStream&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>IntStream flatMapToInt(Function&lt;? super T,? extends IntStream&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>LongStream flatMapToLong(Function&lt;? super T,? extends LongStream&gt; mapper)</code></p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>可以看出，map和flatMap的差别在于</p>
+</div>
+<div class="paragraph">
+<p>map接受的Function类型参数做的事情是在stream的元素类型T和返回的stream元素类型R之间做了一个映射，这种映射是一对一的；</p>
+</div>
+<div class="paragraph">
+<p>而flatMap接受的Function类型参数所做的是在stream的元素类型T和返回类型R所构成的stream之间做了映射，很显然，这种映射是一对多的，也就是说，如果stream的元素类型是一个集合的话，通过flatMap，可以将这些集合展开(flat)。</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 7. mapping示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">,</span><span class="tok-s">&quot;three&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">map</span><span class="tok-o">(</span><span class="tok-n">String</span><span class="tok-o">::</span><span class="tok-n">toUpperCase</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span>
+
+<span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">Arrays</span><span class="tok-o">.</span><span class="tok-na">asList</span><span class="tok-o">(</span><span class="tok-s">&quot;MySQL&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;Mongo&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;PostgreSQL&quot;</span><span class="tok-o">),</span>
+  <span class="tok-n">Arrays</span><span class="tok-o">.</span><span class="tok-na">asList</span><span class="tok-o">(</span><span class="tok-s">&quot;Java&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;C++&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;Swift&quot;</span><span class="tok-o">))</span>
+  <span class="tok-o">.</span><span class="tok-na">flatMap</span><span class="tok-o">(</span><span class="tok-n">element</span> <span class="tok-o">-&gt;</span> <span class="tok-n">element</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">s</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-na">length</span><span class="tok-o">()</span> <span class="tok-o">&gt;</span> <span class="tok-mi">5</span><span class="tok-o">))</span>
+  <span class="tok-o">.</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>可以看到，flatMap在过滤一对多的情况时，会非常有帮助。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="peek查看">Peek(查看)</h4>
+<div class="paragraph">
+<p>这个操作和forEach对应，差别在于forEach是terminal操作，而peek属于intermediate。其方法签名为</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Stream&lt;T&gt; peek(Consumer&lt;? super T&gt; action)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>根据API文档，这个操作主要用于调试，可以将元素打印出来，例如</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 8. peek示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span> <span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+     <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">e</span> <span class="tok-o">-&gt;</span> <span class="tok-n">e</span><span class="tok-o">.</span><span class="tok-na">length</span><span class="tok-o">()</span> <span class="tok-o">&gt;</span> <span class="tok-mi">3</span><span class="tok-o">)</span>
+     <span class="tok-o">.</span><span class="tok-na">peek</span><span class="tok-o">(</span><span class="tok-n">e</span> <span class="tok-o">-&gt;</span> <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-s">&quot;Filtered value: &quot;</span> <span class="tok-o">+</span> <span class="tok-n">e</span><span class="tok-o">))</span>      <b class="conum">(1)</b>
+     <span class="tok-o">.</span><span class="tok-na">map</span><span class="tok-o">(</span><span class="tok-n">String</span><span class="tok-o">::</span><span class="tok-n">toUpperCase</span><span class="tok-o">)</span>
+     <span class="tok-o">.</span><span class="tok-na">peek</span><span class="tok-o">(</span><span class="tok-n">e</span> <span class="tok-o">-&gt;</span> <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-s">&quot;Mapped value: &quot;</span> <span class="tok-o">+</span> <span class="tok-n">e</span><span class="tok-o">))</span>
+     <span class="tok-o">.</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">Collectors</span><span class="tok-o">.</span><span class="tok-na">toList</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>如果这里换做forEach的话，后续操作是无法进行的</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="sequential-parallel-unordered">Sequential, Parallel, Unordered</h4>
+<div class="paragraph">
+<p>这三个操作都继承自BaseStream。</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Stream pipelines may execute either sequentially or in parallel. This execution mode is a property of the stream. Streams are created with an initial choice of sequential or parallel execution. (For example, Collection.stream() creates a sequential stream, and Collection.parallelStream() creates a parallel one.) This choice of execution mode may be modified by the BaseStream.sequential() or BaseStream.parallel() methods, and may be queried with the BaseStream.isParallel() method.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; 官方API文档
+</div>
+</div>
+<div class="paragraph">
+<p>可以看出这三个操作均和stream的运行模式(execution mode)有关，sequential和parallel用于在并行和串行间切换。</p>
+</div>
+<div class="paragraph">
+<p>而unordered则用于在并行情况下，提高运行效率</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>For sequential streams, the presence or absence of an encounter order does not affect performance, only determinism. If a stream is ordered, repeated execution of identical stream pipelines on an identical source will produce an identical result; if it is not ordered, repeated execution might produce different results.
+For parallel streams, relaxing the ordering constraint can sometimes enable more efficient execution.</p>
+</div>
+<div class="paragraph">
+<p>In cases where the stream has an encounter order, but the user does not particularly care about that encounter order, explicitly de-ordering the stream with unordered() may improve parallel performance for some stateful or terminal operations.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; 官方API文档
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="terminal操作">terminal操作</h3>
+<div class="paragraph">
+<p>只有terminal类型操作才会真正开启对stream的处理，此后，stream就无法再被其他操作使用了</p>
+</div>
+<div class="sect3">
+<h4 id="matching匹配">Matching(匹配)</h4>
+<div class="paragraph">
+<p>用于匹配判定，包括三个方法</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>boolean allMatch(Predicate&lt;? super T&gt; predicate)</code>: 全部匹配</p>
+</li>
+<li>
+<p><code>boolean anyMatch(Predicate&lt;? super T&gt; predicate)</code>: 任意匹配</p>
+</li>
+<li>
+<p><code>boolean noneMatch(Predicate&lt;? super T&gt; predicate)</code>: 无匹配</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>根据方法签名的名称，可以看出三个操作各自用途，根据predicate，返回true或者false，</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 9. matching示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-s">&quot;result is : &quot;</span> <span class="tok-o">+</span> <span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">allMatch</span><span class="tok-o">(</span><span class="tok-n">s</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span> <span class="tok-k">instanceof</span> <span class="tok-n">String</span><span class="tok-o">));</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="finding查找">Finding(查找)</h4>
+<div class="paragraph">
+<p>用来查找stream中的元素，包括两个操作</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Optional&lt;T&gt; findFirst()</code>: 找到第一个</p>
+</li>
+<li>
+<p><code>Optional&lt;T&gt; findAny()</code>: 找到任一个</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>可以看到，这两个操作均返回一个包装类型 <mark>Optional&lt;T&gt;</mark>，是一种容器类，用来表示一个值是否存在(关于Optional类的说明，参见<a href="#appxb">附录B</a>)。</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 10. finding示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Optional</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-o">=</span>
+<span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">findAny</span><span class="tok-o">();</span>                               <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>findAny操作属于一个short-circuiting 操作，即只要发现匹配，立刻终止操作并返回，而且出于性能考虑，这个操作返回结果是随机的。</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="iterating迭代">Iterating(迭代)</h4>
+<div class="paragraph">
+<p>遍历stream的每个元素，并执行操作，这个操作包括两个方法签名</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>void forEach(Consumer&lt;? super T&gt; action)</code></p>
+</li>
+<li>
+<p><code>void forEachOrdered(Consumer&lt;? super T&gt; action)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>一般认为，forEach 和常规 for 循环的差异不涉及到性能，它们仅仅是风格的差别</p>
+</div>
+<div class="paragraph">
+<p>这是一个terminal操作，接受一个Consumer类型作为参数，可以对每个元素执行某种操作。和forEachOrdered的差别在于后者
+<mark>processes the elements one at a time</mark>。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="reduction消减">Reduction(消减)</h4>
+<div class="paragraph">
+<p>reduction操作，又称作fold，接受一系列输入元素，通过重复应用某种组合操作(combining operation)，输出单一结果(summary result)，诸如给出一组数值的和或者最大值，或者将元素累计到一个list中。stream包括的reduction操作包括</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>reduce</p>
+</li>
+<li>
+<p>collect</p>
+</li>
+<li>
+<p>sum</p>
+</li>
+<li>
+<p>max</p>
+</li>
+<li>
+<p>count</p>
+</li>
+</ol>
+</div>
+<div class="sect4">
+<h5 id="reduce">reduce</h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Optional&lt;T&gt; reduce(BinaryOperator&lt;T&gt; accumulator)</code></p>
+</li>
+<li>
+<p><code>T reduce(T identity, BinaryOperator&lt;T&gt; accumulator)</code></p>
+</li>
+<li>
+<p><code>&lt;U&gt; U reduce(U identity, BiFunction&lt;U,? super T,U&gt; accumulator, BinaryOperator&lt;U&gt; combiner)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>可以看到，reduce主要操作都由传入的二元操作符BinaryOperation决定。而这个BinaryOperation需要的实现来自BiFunction的接口方法apply，实际提供的是如何设定stream中前后两个元素的关联操作，然后将这种操作复制到所有元素上，例如</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 11. reduce示例(一个参数)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">reduce</span><span class="tok-o">(</span><span class="tok-k">new</span> <span class="tok-n">BinaryOperator</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;()</span> <span class="tok-o">{</span>
+    <span class="tok-nd">@Override</span>
+    <span class="tok-kd">public</span> <span class="tok-n">String</span> <span class="tok-nf">apply</span><span class="tok-o">(</span><span class="tok-n">String</span> <span class="tok-n">s</span><span class="tok-o">,</span> <span class="tok-n">String</span> <span class="tok-n">s2</span><span class="tok-o">)</span> <span class="tok-o">{</span>     <b class="conum">(1)</b>
+      <span class="tok-k">return</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-na">concat</span><span class="tok-o">(</span><span class="tok-s">&quot;,&quot;</span> <span class="tok-o">+</span> <span class="tok-n">s2</span><span class="tok-o">);</span>                   <b class="conum">(2)</b>
+      <span class="tok-k">return</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-na">concat</span><span class="tok-o">(</span><span class="tok-s">&quot;,&quot;</span><span class="tok-o">);</span>                        <b class="conum">(3)</b>
+      <span class="tok-k">return</span> <span class="tok-s">&quot;,&quot;</span><span class="tok-o">+</span><span class="tok-n">s2</span><span class="tok-o">;</span>                               <b class="conum">(4)</b>
+    <span class="tok-o">}</span>
+  <span class="tok-o">}).</span><span class="tok-na">ifPresent</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>s</code>和<code>s2</code>分别代表上次计算结果和当前元素</p>
+</li>
+<li>
+<p>输出<code>one,two,three,four</code></p>
+</li>
+<li>
+<p>输出<code>one,,,</code>。如果<code>s</code>没有被使用，那意味着始终没有上次计算结果</p>
+</li>
+<li>
+<p>输出<code>four,</code>。如果<code>s2</code>没被使用，那意味着除了第一个元素，剩余元素都未被使用</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 12. reduce示例(二个参数)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span>
+<span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">s</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-na">length</span><span class="tok-o">()</span> <span class="tok-o">&gt;</span> <span class="tok-mi">3</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">reduce</span><span class="tok-o">(</span><span class="tok-s">&quot;ccc&quot;</span><span class="tok-o">,</span> <span class="tok-o">(</span><span class="tok-n">s</span><span class="tok-o">,</span> <span class="tok-n">s2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-na">concat</span><span class="tok-o">(</span><span class="tok-s">&quot;,&quot;</span><span class="tok-o">).</span><span class="tok-na">concat</span><span class="tok-o">(</span><span class="tok-n">s2</span><span class="tok-o">)));</span>    <b class="conum">(1)</b> <b class="conum">(2)</b> <b class="conum">(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>具有两个参数的reduce操作，第一个参数是 <code>T identity</code>, 代表初始值</p>
+</li>
+<li>
+<p>输出<code>ccc,three,four</code></p>
+</li>
+<li>
+<p>因为存在初始值，所以此方法返回值不需要包装类型<code>Optional</code></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>而具有三个参数的reduce操作，根据官方文档</p>
+</div>
+<div class="paragraph">
+<p><code>combiner.apply(u, accumulator.apply(identity, t)) == accumulator.apply(u, t)</code>
+究竟是什么意思呢？</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 13. reduce示例(三个参数)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span>
+        <span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">1</span><span class="tok-o">,</span> <span class="tok-mi">2</span><span class="tok-o">,</span> <span class="tok-mi">3</span><span class="tok-o">,</span> <span class="tok-mi">4</span><span class="tok-o">)</span>
+                <span class="tok-o">.</span><span class="tok-na">reduce</span><span class="tok-o">(</span><span class="tok-mi">0</span><span class="tok-o">,</span> <span class="tok-o">(</span><span class="tok-n">n1</span><span class="tok-o">,</span> <span class="tok-n">n2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">n1</span><span class="tok-o">+</span><span class="tok-n">n2</span><span class="tok-o">,</span> <span class="tok-o">(</span><span class="tok-n">p1</span><span class="tok-o">,</span> <span class="tok-n">p2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">p1</span><span class="tok-o">*</span><span class="tok-n">p2</span><span class="tok-o">)</span>        <b class="conum">(1)</b>
+<span class="tok-o">);</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span>
+        <span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">1</span><span class="tok-o">,</span> <span class="tok-mi">2</span><span class="tok-o">,</span> <span class="tok-mi">3</span><span class="tok-o">,</span> <span class="tok-mi">4</span><span class="tok-o">)</span>
+                <span class="tok-o">.</span><span class="tok-na">parallel</span><span class="tok-o">()</span>
+                <span class="tok-o">.</span><span class="tok-na">reduce</span><span class="tok-o">(</span><span class="tok-mi">0</span><span class="tok-o">,</span> <span class="tok-o">(</span><span class="tok-n">n1</span><span class="tok-o">,</span> <span class="tok-n">n2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">n1</span><span class="tok-o">+</span><span class="tok-n">n2</span><span class="tok-o">,</span> <span class="tok-o">(</span><span class="tok-n">p1</span><span class="tok-o">,</span> <span class="tok-n">p2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">p1</span><span class="tok-o">*</span><span class="tok-n">p2</span><span class="tok-o">)</span>        <b class="conum">(2)</b>
+<span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>输出结果10，也就是说combiner完全没用</p>
+</li>
+<li>
+<p>输出为24，在parallel模式下，工作的是combiner</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="collect">collect</h5>
+<div class="paragraph">
+<p>collect是很有用的操作，用于将元素收集到另一个不同的集合里作为结果，有两个方法签名</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;R,A&gt; R collect(Collector&lt;? super T,A,R&gt; collector)</code></p>
+</li>
+<li>
+<p><code>&lt;R&gt; R collect(Supplier&lt;R&gt; supplier,BiConsumer&lt;R,? super T&gt; accumulator,BiConsumer&lt;R,R&gt; combiner)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>它的概念如下</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Collector is specified by four functions that work together to accumulate entries into a mutable result container, and optionally perform a final transform on the result. They are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>creation of a new result container (<code>supplier()</code>)</p>
+</li>
+<li>
+<p>incorporating a new data element into a result container (<code>accumulator()</code>)</p>
+</li>
+<li>
+<p>combining two result containers into one (<code>combiner()</code>)</p>
+</li>
+<li>
+<p>performing an optional final transform on the container (<code>finisher()</code>)</p>
+</li>
+</ul>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; 官网文档
+</div>
+</div>
+<div class="paragraph">
+<p>Java8提供多种内置collectors，可以通过Collectors的静态方法获得(参考<a href="#appxc">附录C</a>)，因此，大多数情况下使用第一种方法就可以了，比如</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 14. collect示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+    <span class="tok-o">.</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">Collectors</span><span class="tok-o">.</span><span class="tok-na">toList</span><span class="tok-o">())</span>
+    <span class="tok-o">.</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="maxmin">max|min</h5>
+<div class="paragraph">
+<p>都是一种特殊的reduction操作，根据指定的comparator排序。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Optional&lt;T&gt; max(Comparator&lt;? super T&gt; comparator)</code></p>
+</li>
+<li>
+<p><code>Optional&lt;T&gt; min(Comparator&lt;? super T&gt; comparator)</code></p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="title">Example 15. max示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;one&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;two&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;three&quot;</span><span class="tok-o">,</span> <span class="tok-s">&quot;four&quot;</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">max</span><span class="tok-o">((</span><span class="tok-n">o1</span><span class="tok-o">,</span> <span class="tok-n">o2</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">o1</span><span class="tok-o">.</span><span class="tok-na">compareTo</span><span class="tok-o">(</span><span class="tok-n">o2</span><span class="tok-o">)</span> <span class="tok-o">&gt;</span> <span class="tok-mi">0</span> <span class="tok-o">?</span> <span class="tok-o">-</span><span class="tok-mi">1</span><span class="tok-o">:</span><span class="tok-mi">1</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">ifPresent</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="count">count</h5>
+<div class="paragraph">
+<p>返回stream中元素数量</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>long count()</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="toarray">toArray</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Object[] toArray()</code></p>
+</li>
+<li>
+<p><code>&lt;A&gt; A[] toArray(IntFunction&lt;A[]&gt; generator)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>toArray是实例方法——将当前stream转换为Array。例如</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 16. toArray示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Arrays</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">(</span>
+<span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">generate</span><span class="tok-o">(()</span> <span class="tok-o">-&gt;</span> <span class="tok-n">UUID</span><span class="tok-o">.</span><span class="tok-na">randomUUID</span><span class="tok-o">().</span><span class="tok-na">toString</span><span class="tok-o">())</span>
+  <span class="tok-o">.</span><span class="tok-na">limit</span><span class="tok-o">(</span><span class="tok-mi">5</span><span class="tok-o">)</span>
+  <span class="tok-o">.</span><span class="tok-na">toArray</span><span class="tok-o">()).</span><span class="tok-na">forEach</span><span class="tok-o">(</span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">::</span><span class="tok-n">println</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>如果希望返回确定的类型，则要用到第二种方法，根据方法签名，可以看到IntFunction泛型是<code>A[]</code>，而接口IntFunction定义为</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-nd">@FunctionalInterface</span>                   <b class="conum">(1)</b>
+<span class="tok-kd">public</span> <span class="tok-kd">interface</span> <span class="tok-nc">IntFunction</span><span class="tok-o">&lt;</span><span class="tok-n">R</span><span class="tok-o">&gt;</span> <span class="tok-o">{</span>
+    <span class="tok-n">R</span> <span class="tok-nf">apply</span><span class="tok-o">(</span><span class="tok-kt">int</span> <span class="tok-n">value</span><span class="tok-o">);</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>函数接口</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>所以，可以这样使用</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Person</span><span class="tok-o">[]</span> <span class="tok-n">men</span> <span class="tok-o">=</span> <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">()</span>
+      <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">p</span> <span class="tok-o">-&gt;</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-na">getGender</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">MALE</span><span class="tok-o">)</span>
+      <span class="tok-o">.</span><span class="tok-na">toArray</span><span class="tok-o">(</span><span class="tok-n">value</span> <span class="tok-o">-&gt;</span> <span class="tok-k">new</span> <span class="tok-n">Person</span><span class="tok-o">[</span><span class="tok-n">value</span><span class="tok-o">]);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>更进一步简化为</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Person</span><span class="tok-o">[]</span> <span class="tok-n">men</span> <span class="tok-o">=</span> <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">()</span>
+      <span class="tok-o">.</span><span class="tok-na">filter</span><span class="tok-o">(</span><span class="tok-n">p</span> <span class="tok-o">-&gt;</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-na">getGender</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">MALE</span><span class="tok-o">)</span>
+      <span class="tok-o">.</span><span class="tok-na">toArray</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">[]::</span><span class="tok-k">new</span><span class="tok-o">);</span>                 <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>方法引用(Method Reference), java8特性之一</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="其他操作">其他操作</h4>
+<div class="sect4">
+<h5 id="empty">empty</h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt; empty()</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>这个方法返回一个空的stream。很显然，其设计目的就是为了避免NPE，而在一些需要返回stream类型的地方作为填充对象使用的。</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="concat">concat</h5>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt; concat(Stream&lt;? extends T&gt; a, Stream&lt;? extends T&gt; b)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>将两个stream拼凑起来，第二个stream的元素会跟在第一个stream的后面，如果两个stream都是ordered的，那么拼凑的stream也是排好序的，如果其中一个是parallel的，那么拼凑的stream就是parallel的。只有当拼凑的stream关闭的时候，两个输入stream才会关闭。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="stream-construction构造方法">Stream construction(构造方法)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="built-in内置">built-in(内置)</h3>
+<div class="paragraph">
+<p>了解了stream支持的操作之后，看一下如果构造一个stream。通过之前的例子可以看到，Stream的静态方法<code>of(T ..)</code>可以构造一个stream</p>
+</div>
+<div class="sect3">
+<h4 id="oft">of(T..)</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt; of(T t)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt; of(T&#8230;&#8203; values)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>除了of()方法之外，Stream类还提供了其他静态方法builder,generate,iterate用于构造一个stream</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="builder">builder()</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream.Builder&lt;T&gt; builder()</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>返回一个Stream的builder。</p>
+</div>
+<div class="paragraph">
+<p>查看其源码</p>
+</div>
+<div class="listingblock">
+<div class="title">Stream.builder()</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kd">public</span> <span class="tok-kd">static</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">Builder</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-nf">builder</span><span class="tok-o">()</span> <span class="tok-o">{</span>
+    <span class="tok-k">return</span> <span class="tok-k">new</span> <span class="tok-n">Streams</span><span class="tok-o">.</span><span class="tok-na">StreamBuilderImpl</span><span class="tok-o">&lt;&gt;();</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以看出实际是通过Stream的帮助类Streams的静态子类构造的。示例</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 17. Stream.builder()</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">streamBuilder</span> <span class="tok-o">=</span>
+  <span class="tok-n">Stream</span><span class="tok-o">.&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span><span class="tok-n">builder</span><span class="tok-o">().</span><span class="tok-na">add</span><span class="tok-o">(</span><span class="tok-s">&quot;a&quot;</span><span class="tok-o">).</span><span class="tok-na">add</span><span class="tok-o">(</span><span class="tok-s">&quot;b&quot;</span><span class="tok-o">).</span><span class="tok-na">add</span><span class="tok-o">(</span><span class="tok-s">&quot;c&quot;</span><span class="tok-o">).</span><span class="tok-na">build</span><span class="tok-o">();</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="generate">generate()</h4>
+<div class="paragraph">
+<p>返回一个infinite,sequential,unordered的stream。元素均由Supplier产生。这个方法适合用来生成constant streams,streams of random elements等。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt; generate(Supplier&lt;T&gt; s)</code></p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="title">Example 18. Stream.generate()</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kt">int</span> <span class="tok-n">days</span> <span class="tok-o">=</span> <span class="tok-n">Period</span><span class="tok-o">.</span><span class="tok-na">between</span><span class="tok-o">(</span><span class="tok-n">start</span><span class="tok-o">,</span> <span class="tok-n">end</span><span class="tok-o">).</span><span class="tok-na">getDays</span><span class="tok-o">();</span>
+
+<span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">LocalDate</span><span class="tok-o">&gt;</span> <span class="tok-n">serials</span> <span class="tok-o">=</span> <span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">iterate</span><span class="tok-o">(</span><span class="tok-n">start</span><span class="tok-o">,</span> <span class="tok-n">d</span> <span class="tok-o">-&gt;</span> <span class="tok-n">d</span><span class="tok-o">.</span><span class="tok-na">plusDays</span><span class="tok-o">(</span><span class="tok-mi">1</span><span class="tok-o">)).</span><span class="tok-na">limit</span><span class="tok-o">(</span><span class="tok-n">days</span><span class="tok-o">+</span><span class="tok-mi">1</span><span class="tok-o">).</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">Collectors</span><span class="tok-o">.</span><span class="tok-na">toList</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="iterate">iterate()</h4>
+<div class="paragraph">
+<p>返回一个infinite,sequential,ordered的stream。迭代使用函数f和初始元素seed，生成由seed,f(seed),f(f(seed))等一系列元素组成的stream。注意UnaryOperator是一元操作符。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt; iterate(T seed, UnaryOperator&lt;T&gt; f)</code></p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="title">Example 19. Stream.generate()</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">Integer</span><span class="tok-o">&gt;</span> <span class="tok-n">streamIterated</span> <span class="tok-o">=</span> <span class="tok-n">Stream</span><span class="tok-o">.</span><span class="tok-na">iterate</span><span class="tok-o">(</span><span class="tok-mi">40</span><span class="tok-o">,</span> <span class="tok-n">n</span> <span class="tok-o">-&gt;</span> <span class="tok-n">n</span> <span class="tok-o">+</span> <span class="tok-mi">2</span><span class="tok-o">).</span><span class="tok-na">limit</span><span class="tok-o">(</span><span class="tok-mi">20</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>以上两种静态方法<code>generate()</code>和<code>iterate()</code>创建的stream可以是无限(infinite)的。这意味着，这两个静态方法可以用于支持一些真正的大数据操作。</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="collection">collection</h3>
+<div class="paragraph">
+<p>可以通过集合类的新接口方法创建stream。比如List, Set, Map之类的<code>stream()</code>方法，</p>
+</div>
+<div class="listingblock">
+<div class="title">stream()源码</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-k">default</span> <span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">E</span><span class="tok-o">&gt;</span> <span class="tok-nf">stream</span><span class="tok-o">()</span> <span class="tok-o">{</span>
+    <span class="tok-k">return</span> <span class="tok-n">StreamSupport</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">(</span><span class="tok-n">spliterator</span><span class="tok-o">(),</span> <span class="tok-kc">false</span><span class="tok-o">);</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">parallelStream()源码</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-k">default</span> <span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">E</span><span class="tok-o">&gt;</span> <span class="tok-nf">parallelStream</span><span class="tok-o">()</span> <span class="tok-o">{</span>
+    <span class="tok-k">return</span> <span class="tok-n">StreamSupport</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">(</span><span class="tok-n">spliterator</span><span class="tok-o">(),</span> <span class="tok-kc">true</span><span class="tok-o">);</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以看到这两个方法都是接口默认方法。</p>
+</div>
+<div class="listingblock">
+<div class="title">of()源码</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kd">public</span> <span class="tok-kd">static</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-nf">of</span><span class="tok-o">(</span><span class="tok-n">T</span> <span class="tok-n">t</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-k">return</span> <span class="tok-n">StreamSupport</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">(</span><span class="tok-k">new</span> <span class="tok-n">Streams</span><span class="tok-o">.</span><span class="tok-na">StreamBuilderImpl</span><span class="tok-o">&lt;&gt;(</span><span class="tok-n">t</span><span class="tok-o">),</span> <span class="tok-kc">false</span><span class="tok-o">);</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以看出来实际都是调用StreamSupport的<code>stream(Streams.StreamBuilderImpl&lt;T&gt;, boolean)</code>方法。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="array">array</h3>
+<div class="paragraph">
+<p>数组的工具类Arrays也提供构造stream的静态方法</p>
+</div>
+<div class="listingblock">
+<div class="title">arrays构造stream源码</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-nf">stream</span><span class="tok-o">(</span><span class="tok-n">T</span><span class="tok-o">[]</span> <span class="tok-n">array</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-k">return</span> <span class="tok-n">stream</span><span class="tok-o">(</span><span class="tok-n">array</span><span class="tok-o">,</span> <span class="tok-mi">0</span><span class="tok-o">,</span> <span class="tok-n">array</span><span class="tok-o">.</span><span class="tok-na">length</span><span class="tok-o">);</span>
+<span class="tok-o">}</span>
+
+<span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">Stream</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-nf">stream</span><span class="tok-o">(</span><span class="tok-n">T</span><span class="tok-o">[]</span> <span class="tok-n">array</span><span class="tok-o">,</span> <span class="tok-kt">int</span> <span class="tok-n">startInclusive</span><span class="tok-o">,</span> <span class="tok-kt">int</span> <span class="tok-n">endExclusive</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-k">return</span> <span class="tok-n">StreamSupport</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">(</span><span class="tok-n">spliterator</span><span class="tok-o">(</span><span class="tok-n">array</span><span class="tok-o">,</span> <span class="tok-n">startInclusive</span><span class="tok-o">,</span> <span class="tok-n">endExclusive</span><span class="tok-o">),</span> <span class="tok-kc">false</span><span class="tok-o">);</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="file">file</h3>
+<div class="paragraph">
+<p>Java 8也提供跟File相关的构造stream的方法。</p>
+</div>
+<div class="paragraph">
+<p>比如Files类提供几个静态方法，可以得到stream实例：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static Stream&lt;Path&gt; find(Path start, int maxDepth, BiPredicate&lt;Path,BasicFileAttributes&gt; matcher, FileVisitOption&#8230;&#8203; options) throws IOException</code></p>
+</li>
+<li>
+<p><code>static Stream&lt;String&gt; lines(Path path)</code></p>
+</li>
+<li>
+<p><code>static Stream&lt;String&gt; lines(Path path, Charset cs)</code></p>
+</li>
+<li>
+<p><code>Stream&lt;Path&gt; list(Path dir)</code></p>
+</li>
+<li>
+<p><code>static Stream&lt;Path&gt; walk(Path start, FileVisitOption&#8230;&#8203; options)</code></p>
+</li>
+<li>
+<p><code>static Stream&lt;Path&gt; walk(Path start, int maxDepth, FileVisitOption&#8230;&#8203; options)</code></p>
+</li>
+<li>
+<p><code>static Stream&lt;Path&gt; list(Path dir)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>还有BufferedReader的方法：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Stream&lt;String&gt; lines()</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>以及java.util.jar.JarFile提供的</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Stream&lt;JarEntry&gt;	stream()</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>java.uitl.zip提供的</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Stream&lt;? extends ZipEntry&gt; stream()</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="streamsupport">streamsupport</h3>
+<div class="paragraph">
+<p>通过StreamSupport的一组stream方法，也可以构造stream。它提供了3对方法，支持产生基本类型的stream</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static DoubleStream doubleStream(Spliterator.OfDouble spliterator, boolean parallel)</code></p>
+</li>
+<li>
+<p><code>static DoubleStream doubleStream(Supplier&lt;? extends Spliterator.OfDouble&gt; supplier, int characteristics, boolean parallel)</code></p>
+</li>
+<li>
+<p><code>static IntStream	intStream(Spliterator.OfInt spliterator, boolean parallel)</code></p>
+</li>
+<li>
+<p><code>static IntStream	intStream(Supplier&lt;? extends Spliterator.OfInt&gt; supplier, int characteristics, boolean parallel)</code></p>
+</li>
+<li>
+<p><code>static LongStream longStream(Spliterator.OfLong spliterator, boolean parallel)</code></p>
+</li>
+<li>
+<p><code>static LongStream longStream(Supplier&lt;? extends Spliterator.OfLong&gt; supplier, int characteristics, boolean parallel)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>以及一对方法用于提供引用类型的stream</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt;	stream(Spliterator&lt;T&gt; spliterator, boolean parallel)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Stream&lt;T&gt;	stream(Supplier&lt;? extends Spliterator&lt;T&gt;&gt; supplier, int characteristics, boolean parallel)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>至于这些方法中所需要的spliterator从何而来？Java 8提供了相应的工具类Spliterators，可以方便地构造出所需要的spliterator，当然，如果实在没有符合要求的构造方法，只能自己实现。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="numeric-streams">Numeric Streams</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>通过官方文档，可以看到和Stream接口并列的还有三个支持基本类型的接口。</p>
+</div>
+<div class="listingblock">
+<div class="title">主要stream类的层次</div>
+<div class="content">
+<pre>- java.util.stream.BaseStream&lt;T,S&gt;
+  | - java.util.stream.DoubleStream
+  | - java.util.stream.IntStream
+  | - java.util.stream.LongStream
+  | - java.util.stream.Stream&lt;T&gt;</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="intstream">IntStream</h3>
+<div class="paragraph">
+<p>通过文档，可以看到一些操作诸如<code>allMatch(IntPredicate predicate)</code>,<code>concat(IntStream a, IntStream b)</code>之类，和Stream类相比，方法名称相同，只是参数适配Integer类型，那么其实作用和用法都是一样的，就不必细究。主要看一下真正不同于Stream的一些方法</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>DoubleStream asDoubleStream()</code></p>
+</li>
+<li>
+<p><code>LongStream asLongStream()</code></p>
+</li>
+<li>
+<p><code>OptionalDouble average()</code></p>
+</li>
+<li>
+<p><code>Stream&lt;Integer&gt; boxed()</code></p>
+</li>
+<li>
+<p><code>&lt;U&gt; Stream&lt;U&gt; mapToObj(IntFunction&lt;? extends U&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static IntStream	range(int startInclusive, int endExclusive)</code></p>
+</li>
+<li>
+<p><code>static IntStream	rangeClosed(int startInclusive, int endInclusive)</code></p>
+</li>
+<li>
+<p><code>Spliterator.OfInt spliterator()</code></p>
+</li>
+<li>
+<p><code>int sum()</code></p>
+</li>
+<li>
+<p><code>IntSummaryStatistics summaryStatistics()</code></p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="boxed">boxed</h4>
+<div class="paragraph">
+<p>根据API文档，这个方法返回Stream，每个元素都会被boxes to Integer</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="rangerangeclosed">range|rangeClosed</h4>
+<div class="paragraph">
+<p>这两个静态方法根据两个值之间的连续整数生成一个stream，两个方法的startInclusive都是inclusive的，而endExclusive一个是exclusive的，一个是inclusive的</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="spliterator">spliterator</h4>
+<div class="paragraph">
+<p>返回一个Spliterator.OfInt类型</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="summarystatistics">summaryStatistics</h4>
+<div class="paragraph">
+<p>返回的类型IntSummaryStatistics是一个统计类，提供count,min,max,sum,average等指标。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="construction">construction</h4>
+<div class="paragraph">
+<p>除了和Stream相似的一些Stream类的构造方法外，还有一些构造IntStream的方法，根据API文档，主要有</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>CharSequence.chars()</code></p>
+</li>
+<li>
+<p><code>CharSequence.codePoints()</code></p>
+</li>
+<li>
+<p><code>CharBuffer.chars()</code></p>
+</li>
+<li>
+<p><code>Random.ints()</code></p>
+</li>
+<li>
+<p><code>SplittableRandom.ints()</code></p>
+</li>
+<li>
+<p><code>BitSet.stream()</code></p>
+</li>
+<li>
+<p><code>ThreadLocalRandom.ints()</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="longstream">LongStream</h3>
+<div class="paragraph">
+<p>和IntStream类似，只有asDoubleStream方法</p>
+</div>
+<div class="sect3">
+<h4 id="construction-2">construction</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Random.longs()</code></p>
+</li>
+<li>
+<p><code>SplittableRandom.longs()</code></p>
+</li>
+<li>
+<p><code>ThreadLocalRandom.longs()</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="doublestream">DoubleStream</h3>
+<div class="paragraph">
+<p>没有range和rangeClosed方法，没有asXXXStream方法</p>
+</div>
+<div class="sect3">
+<h4 id="construction-3">construction</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Random.doubles()</code></p>
+</li>
+<li>
+<p><code>SplittableRandom.doubles()</code></p>
+</li>
+<li>
+<p><code>ThreadLocalRandom.doubles()</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="appxa">Appendix A: Stream操作一览</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. 操作表</caption>
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 42.8571%;">
+<col style="width: 42.8572%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">序号</th>
+<th class="tableblock halign-left valign-top">方法签名</th>
+<th class="tableblock halign-left valign-top">类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; filter(Predicate&lt;? super T&gt; predicate)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; distinct()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; limit(long maxSize)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; skip(long n)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; sorted()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; sorted(Comparator&lt;? super T&gt; comparator)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;R&gt; Stream&lt;R&gt; map(Function&lt;? super T,? extends R&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DoubleStream mapToDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">9</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>IntStream mapToInt(ToIntFunction&lt;? super T&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">10</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LongStream mapToLong(ToLongFunction&lt;? super T&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">11</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;R&gt; Stream&lt;R&gt; flatMap(Function&lt;? super T,? extends Stream&lt;? extends R&gt;&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">12</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DoubleStream flatMapToDouble(Function&lt;? super T,? extends DoubleStream&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">13</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>IntStream flatMapToInt(Function&lt;? super T,? extends IntStream&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">14</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LongStream flatMapToLong(Function&lt;? super T,? extends LongStream&gt; mapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">15</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt; peek(Consumer&lt;? super T&gt; action)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">16</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>S parallel()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">17</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>S sequential()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">18</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>S unordered()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intermediate</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">19</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean allMatch(Predicate&lt;? super T&gt; predicate)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">20</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean anyMatch(Predicate&lt;? super T&gt; predicate)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">21</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean noneMatch(Predicate&lt;? super T&gt; predicate)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">22</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Optional&lt;T&gt; findAny()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">23</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Optional&lt;T&gt; findFirst()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">24</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>void forEach(Consumer&lt;? super T&gt; action)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">25</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>void forEachOrdered(Consumer&lt;? super T&gt; action)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">26</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Optional&lt;T&gt; reduce(BinaryOperator&lt;T&gt; accumulator)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">27</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>T reduce(T identity, BinaryOperator&lt;T&gt; accumulator)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">28</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;U&gt; U reduce(U identity, BiFunction&lt;U,? super T,U&gt; accumulator, BinaryOperator&lt;U&gt; combiner)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">29</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;R,A&gt; R collect(Collector&lt;? super T,A,R&gt; collector)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">30</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;R&gt; R collect(Supplier&lt;R&gt; supplier, BiConsumer&lt;R,? super T&gt; accumulator, BiConsumer&lt;R,R&gt; combiner)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">31</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Optional&lt;T&gt; max(Comparator&lt;? super T&gt; comparator)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">32</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Optional&lt;T&gt; min(Comparator&lt;? super T&gt; comparator)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">33</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long count()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">34</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object[] toArray()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">35</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;A&gt; A[] toArray(IntFunction&lt;A[]&gt; generator)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">terminal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">36</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream&lt;T&gt; of(T&#8230;&#8203; values)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">constructional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">37</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream&lt;T&gt; of(T t)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">constructional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">38</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream.Builder&lt;T&gt; builder()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">constructional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">39</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream&lt;T&gt; generate(Supplier&lt;T&gt; s)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">constructional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">40</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream&lt;T&gt; iterate(T seed, UnaryOperator&lt;T&gt; f)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">constructional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">41</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream&lt;T&gt; concat(Stream&lt;? extends T&gt; a, Stream&lt;? extends T&gt; b)</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">42</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>static &lt;T&gt; Stream&lt;T&gt; empty()</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="appxb">Appendix B: Optional介绍</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>可以看到stream的一些terminal操作返回结果是Optional类型，那么来看一看Optional类。</p>
+</div>
+<div class="paragraph">
+<p><code>Optional&lt;T&gt;</code>位于java.util包下，同级同时提供OptionalInt,OptionalLong,OptionalDouble三个基本类型类。
+Optional是一个包装类，可能包含或者不包含非空对象。如果存在非空对象，那么<code>isPresent()</code>返回true，<code>get()</code>返回被包含对象。</p>
+</div>
+<div class="sect2">
+<h3 id="construction-4">construction</h3>
+<div class="paragraph">
+<p>根据API文档，看到Optional提供了3个用于构造Optional的静态方法</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Optional&lt;T&gt; empty()</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Optional&lt;T&gt; of(T value)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Optional&lt;T&gt; ofNullable(T value)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><code>empty()</code>直接返回一个空的Optional对象，而<code>of(T value)</code>返回包含一个非空对象的Optional对象，如果value为空的话，会抛出NPE异常；所以，如果不确定需要被包装的对象是否为空的话，应当使用<code>ofNullable(T value)</code>，如果被包装对象是null的话，它返回的是一个空的Optional(调用<code>empty()</code>)方法。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="consume">consume</h3>
+<div class="paragraph">
+<p>那么，如果使用Optional呢？先看几个方法</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>T get()</code>: 返回被包装的对象，如果对象为空，则会抛<mark>NoSuchElementException</mark>异常</p>
+</li>
+<li>
+<p><code>void ifPresent(Consumer&lt;? super T&gt; consumer)</code>: 如果对象存在，则进行操作，否则什么都不发生</p>
+</li>
+<li>
+<p><code>T orElse(T other)</code>: 如果对象不为空，返回对象，否则，调用并返回other</p>
+</li>
+<li>
+<p><code>T orElseGet(Supplier&lt;? extends T&gt; other)</code>: 如果对象不为空，返回对象，否则，调用并返回other的结果</p>
+</li>
+<li>
+<p><code>&lt;X extends Throwable&gt; T orElseThrow(Supplier&lt;? extends X&gt; exceptionSupplier) throws X extends Throwable</code>: 如果对象不为空，返回对象；否则，抛出provider创建的异常</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>其中，orElse和orElseGet不容易区分。通过一个简单的例子进行对比</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 20. 包装对象不为空</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span>  <span class="tok-n">String</span> <span class="tok-n">str</span> <span class="tok-o">=</span> <span class="tok-s">&quot;bar&quot;</span><span class="tok-o">;</span>
+  <span class="tok-n">Optional</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">op2</span> <span class="tok-o">=</span> <span class="tok-n">Optional</span><span class="tok-o">.</span><span class="tok-na">ofNullable</span><span class="tok-o">(</span><span class="tok-n">str</span><span class="tok-o">);</span>
+  <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-n">op2</span><span class="tok-o">.</span><span class="tok-na">orElse</span><span class="tok-o">(</span><span class="tok-n">foo</span><span class="tok-o">()));</span>
+  <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-n">op2</span><span class="tok-o">.</span><span class="tok-na">orElseGet</span><span class="tok-o">(()</span> <span class="tok-o">-&gt;</span> <span class="tok-n">foo</span><span class="tok-o">()));</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>输出</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&gt; foo...
+bar
+bar</pre>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 21. 包装对象为空</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span>  <span class="tok-n">String</span> <span class="tok-n">str</span> <span class="tok-o">=</span> <span class="tok-s">&quot;bar&quot;</span><span class="tok-o">;</span>
+  <span class="tok-n">str</span> <span class="tok-o">=</span> <span class="tok-kc">null</span><span class="tok-o">;</span>
+  <span class="tok-n">Optional</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">op2</span> <span class="tok-o">=</span> <span class="tok-n">Optional</span><span class="tok-o">.</span><span class="tok-na">ofNullable</span><span class="tok-o">(</span><span class="tok-n">str</span><span class="tok-o">);</span>
+  <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-n">op2</span><span class="tok-o">.</span><span class="tok-na">orElse</span><span class="tok-o">(</span><span class="tok-n">foo</span><span class="tok-o">()));</span>
+  <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-n">op2</span><span class="tok-o">.</span><span class="tok-na">orElseGet</span><span class="tok-o">(()</span> <span class="tok-o">-&gt;</span> <span class="tok-n">foo</span><span class="tok-o">()));</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>输出</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&gt; foo...
+foo
+foo...
+foo</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以看到，不论被包装对象是否存在，orElseGet都仅仅返回最终对象；而orElse在被包装对象不为空的时候，会调用并执行替代方法。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="filtermap">filter|map</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Optional&lt;T&gt; filter(Predicate&lt;? super T&gt; predicate)</code></p>
+</li>
+<li>
+<p><code>&lt;U&gt; Optional&lt;U&gt; map(Function&lt;? super T,? extends U&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>&lt;U&gt; Optional&lt;U&gt; flatMap(Function&lt;? super T,Optional&lt;U&gt;&gt; mapper)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>可以看到，Optional支持过滤和映射操作。</p>
+</div>
+<div class="paragraph">
+<p>需要注意的是map操作，API文档，</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>This method supports post-processing on optional values&#8230;&#8203;</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; API文档
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="appxc">Appendix C: Collectors一览</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>按照Jave API的习惯，看得出来Collectors是Collector的工具类。提供了一些outboxing的静态方法用于redunction操作。官方文档给出了一些示例，这里对其API方法做一个整理。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; averagingDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; averagingInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; averagingLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Long&gt; counting()</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K&gt; Collector&lt;T,?,Map&lt;K,List&lt;T&gt;&gt;&gt; groupingBy(Function&lt;? super T,? extends K&gt; classifier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,A,D&gt; Collector&lt;T,?,Map&lt;K,D&gt;&gt; groupingBy(Function&lt;? super T,? extends K&gt; classifier, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,D,A,M extends Map&lt;K,D&gt;&gt; Collector&lt;T,?,M&gt; groupingBy(Function&lt;? super T,? extends K&gt; classifier, Supplier&lt;M&gt; mapFactory, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K&gt; Collector&lt;T,?,ConcurrentMap&lt;K,List&lt;T&gt;&gt;&gt; groupingByConcurrent(Function&lt;? super T,? extends K&gt; classifier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,A,D&gt; Collector&lt;T,?,ConcurrentMap&lt;K,D&gt;&gt; groupingByConcurrent(Function&lt;? super T,? extends K&gt; classifier, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,A,D,M extends ConcurrentMap&lt;K,D&gt;&gt; Collector&lt;T,?,M&gt; groupingByConcurrent(Function&lt;? super T,? extends K&gt; classifier, Supplier&lt;M&gt; mapFactory, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static Collector&lt;CharSequence,?,String&gt; joining()</code></p>
+</li>
+<li>
+<p><code>static Collector&lt;CharSequence,?,String&gt; joining(CharSequence delimiter)</code></p>
+</li>
+<li>
+<p><code>static Collector&lt;CharSequence,?,String&gt; joining(CharSequence delimiter, CharSequence prefix, CharSequence suffix)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,U,A,R&gt; Collector&lt;T,?,R&gt; mapping(Function&lt;? super T,? extends U&gt; mapper, Collector&lt;? super U,A,R&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Optional&lt;T&gt;&gt; maxBy(Comparator&lt;? super T&gt; comparator)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Optional&lt;T&gt;&gt; minBy(Comparator&lt;? super T&gt; comparator)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Map&lt;Boolean,List&lt;T&gt;&gt;&gt; partitioningBy(Predicate&lt;? super T&gt; predicate)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,D,A&gt; Collector&lt;T,?,Map&lt;Boolean,D&gt;&gt; partitioningBy(Predicate&lt;? super T&gt; predicate, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Optional&lt;T&gt;&gt; reducing(BinaryOperator&lt;T&gt; op)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,T&gt; reducing(T identity, BinaryOperator&lt;T&gt; op)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,U&gt; Collector&lt;T,?,U&gt; reducing(U identity, Function&lt;? super T,? extends U&gt; mapper, BinaryOperator&lt;U&gt; op)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,DoubleSummaryStatistics&gt; summarizingDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,IntSummaryStatistics&gt; summarizingInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,LongSummaryStatistics&gt; summarizingLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; summingDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Integer&gt; summingInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Long&gt; summingLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,C extends Collection&lt;T&gt;&gt; Collector&lt;T,?,C&gt; toCollection(Supplier&lt;C&gt; collectionFactory)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,List&lt;T&gt;&gt; toList()</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Set&lt;T&gt;&gt; toSet()</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,Map&lt;K,U&gt;&gt; toMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,Map&lt;K,U&gt;&gt; toMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U,M extends Map&lt;K,U&gt;&gt; Collector&lt;T,?,M&gt; toMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction, Supplier&lt;M&gt; mapSupplier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,ConcurrentMap&lt;K,U&gt;&gt; toConcurrentMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,ConcurrentMap&lt;K,U&gt;&gt; toConcurrentMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U,M extends ConcurrentMap&lt;K,U&gt;&gt; Collector&lt;T,?,M&gt; toConcurrentMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction, Supplier&lt;M&gt; mapSupplier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,A,R,RR&gt; Collector&lt;T,A,RR&gt; collectingAndThen(Collector&lt;T,A,R&gt; downstream, Function&lt;R,RR&gt; finisher)</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>基本上可以认为这些返回Collector的方法都会被应用在Stream.collect()方法中(见<a href="#appxa">附录A</a>的29行)</p>
+</div>
+<div class="paragraph">
+<p><code>&lt;R,A&gt; R collect(Collector&lt;? super T,A,R&gt; collector)</code></p>
+</div>
+<div class="paragraph">
+<p>可以知道collect返回类型R对应Collectors各个方法的返回结果中第三个泛型类型</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>这三个方法用于计算平均值</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; averagingDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; averagingInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; averagingLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+</ul>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>计算数量，等同于<code>Stream.count()</code></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Long&gt; counting()</code></p>
+</li>
+</ul>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>分组：对于stream的T类型元素，应用grouping by操作进行分组，返回结果是<code>Map&lt;K,List&lt;T&gt;&gt;</code></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T,K&gt; Collector&lt;T,?,Map&lt;K,List&lt;T&gt;&gt;&gt; groupingBy(Function&lt;? super T,? extends K&gt; classifier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,A,D&gt; Collector&lt;T,?,Map&lt;K,D&gt;&gt; groupingBy(Function&lt;? super T,? extends K&gt; classifier, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,D,A,M extends Map&lt;K,D&gt;&gt; Collector&lt;T,?,M&gt; groupingBy(Function&lt;? super T,? extends K&gt; classifier, Supplier&lt;M&gt; mapFactory, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K&gt; Collector&lt;T,?,ConcurrentMap&lt;K,List&lt;T&gt;&gt;&gt; groupingByConcurrent(Function&lt;? super T,? extends K&gt; classifier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,A,D&gt; Collector&lt;T,?,ConcurrentMap&lt;K,D&gt;&gt; groupingByConcurrent(Function&lt;? super T,? extends K&gt; classifier, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,A,D,M extends ConcurrentMap&lt;K,D&gt;&gt; Collector&lt;T,?,M&gt; groupingByConcurrent(Function&lt;? super T,? extends K&gt; classifier, Supplier&lt;M&gt; mapFactory, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>对于第一个只有一个Function参数的groupingBy方法而言，等同于调用第二个方法<code>groupingBy(classifier, toList())</code></p>
+</div>
+<div class="paragraph">
+<p>第二个groupingBy方法,返回结果<code>Map&lt;K,D&gt;</code>中的D，由指定的downstream返回类型D决定，</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 22. groupBy示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Map</span><span class="tok-o">&lt;</span><span class="tok-n">City</span><span class="tok-o">,</span> <span class="tok-n">Set</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;&gt;</span> <span class="tok-n">namesByCity</span> <span class="tok-o">=</span>
+  <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">groupingBy</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getCity</span><span class="tok-o">,</span>
+        <span class="tok-n">mapping</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getLastName</span><span class="tok-o">,</span> <span class="tok-n">toSet</span><span class="tok-o">())));</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>第三个groupingBy与第二个相比，多一个参数<code>Supplier&lt;M&gt; mapFactory</code>，用于包装返回的Map为类型<code>&lt;M&gt;</code>。</p>
+</div>
+<div class="paragraph">
+<p>另外三个带Concurrent的groupingBy方法，顾名思义，返回的是java.concurrent包里的集合。</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>拼接: 用于将元素拼接起来</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static Collector&lt;CharSequence,?,String&gt; joining()</code></p>
+</li>
+<li>
+<p><code>static Collector&lt;CharSequence,?,String&gt; joining(CharSequence delimiter)</code></p>
+</li>
+<li>
+<p><code>static Collector&lt;CharSequence,?,String&gt; joining(CharSequence delimiter, CharSequence prefix, CharSequence suffix)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>第一个仅仅是将所有元素连接起来，没有任何连接字符；第二个方法指定一个连接符；第三个方法指定连接符、以及前缀和后缀——前缀和后缀仅仅出现在最终结果的最前面和最后。</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>映射:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T,U,A,R&gt; Collector&lt;T,?,R&gt; mapping(Function&lt;? super T,? extends U&gt; mapper, Collector&lt;? super U,A,R&gt; downstream)</code></p>
+</li>
+</ul>
+</div>
+<div class="exampleblock">
+<div class="title">Example 23. mapping示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span>
+ <span class="tok-n">Map</span><span class="tok-o">&lt;</span><span class="tok-n">City</span><span class="tok-o">,</span> <span class="tok-n">Set</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;&gt;</span> <span class="tok-n">lastNamesByCity</span>
+     <span class="tok-o">=</span> <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">groupingBy</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getCity</span><span class="tok-o">,</span>
+                                          <span class="tok-n">mapping</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getLastName</span><span class="tok-o">,</span> <span class="tok-n">toSet</span><span class="tok-o">())));</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>输出</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{"LA"=["Jason","Jackson"], "New York"=["Hunt","Wilson"]}</pre>
+</div>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>排序: 最大或最小</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Optional&lt;T&gt;&gt; maxBy(Comparator&lt;? super T&gt; comparator)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Optional&lt;T&gt;&gt; minBy(Comparator&lt;? super T&gt; comparator)</code></p>
+</li>
+</ul>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>一分为二: 根据判定，将stream一分为二</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Map&lt;Boolean,List&lt;T&gt;&gt;&gt; partitioningBy(Predicate&lt;? super T&gt; predicate)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,D,A&gt; Collector&lt;T,?,Map&lt;Boolean,D&gt;&gt; partitioningBy(Predicate&lt;? super T&gt; predicate, Collector&lt;? super T,A,D&gt; downstream)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>如何一分为二呢？通过返回一个key为Boolean的Map实现的。</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>化归: 将stream的元素按照某种操作进行化归操作——即集合中的前后元素应用该操作之后继续和接下来的元素应用该操作，例如对一个自然数集合应用加法之类</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>counting()</code>等同于<code>reducing(0L, e &#8594; 1L, Long::sum)</code></p>
+</li>
+<li>
+<p><code>minBy()</code>等同于<code>reducing(BinaryOperator.minBy(comparator))</code></p>
+</li>
+<li>
+<p><code>maxBy()</code>等同于<code>reducing(BinaryOperator.maxBy(comparator))</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Optional&lt;T&gt;&gt; reducing(BinaryOperator&lt;T&gt; op)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,T&gt; reducing(T identity, BinaryOperator&lt;T&gt; op)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,U&gt; Collector&lt;T,?,U&gt; reducing(U identity, Function&lt;? super T,? extends U&gt; mapper, BinaryOperator&lt;U&gt; op)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>注意:<code>BinaryOperator</code>是一个函数接口(FunctionalInterface)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-nd">@FunctionalInterface</span>
+<span class="tok-kd">public</span> <span class="tok-kd">interface</span> <span class="tok-nc">BinaryOperator</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-kd">extends</span> <span class="tok-n">BiFunction</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">,</span><span class="tok-n">T</span><span class="tok-o">,</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-o">{</span>
+    <span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">BinaryOperator</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-nf">minBy</span><span class="tok-o">(</span><span class="tok-n">Comparator</span><span class="tok-o">&lt;?</span> <span class="tok-kd">super</span> <span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">comparator</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+        <span class="tok-n">Objects</span><span class="tok-o">.</span><span class="tok-na">requireNonNull</span><span class="tok-o">(</span><span class="tok-n">comparator</span><span class="tok-o">);</span>
+        <span class="tok-k">return</span> <span class="tok-o">(</span><span class="tok-n">a</span><span class="tok-o">,</span> <span class="tok-n">b</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">comparator</span><span class="tok-o">.</span><span class="tok-na">compare</span><span class="tok-o">(</span><span class="tok-n">a</span><span class="tok-o">,</span> <span class="tok-n">b</span><span class="tok-o">)</span> <span class="tok-o">&lt;=</span> <span class="tok-mi">0</span> <span class="tok-o">?</span> <span class="tok-n">a</span> <span class="tok-o">:</span> <span class="tok-n">b</span><span class="tok-o">;</span>
+    <span class="tok-o">}</span>
+
+    <span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">BinaryOperator</span><span class="tok-o">&lt;</span><span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-nf">maxBy</span><span class="tok-o">(</span><span class="tok-n">Comparator</span><span class="tok-o">&lt;?</span> <span class="tok-kd">super</span> <span class="tok-n">T</span><span class="tok-o">&gt;</span> <span class="tok-n">comparator</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+        <span class="tok-n">Objects</span><span class="tok-o">.</span><span class="tok-na">requireNonNull</span><span class="tok-o">(</span><span class="tok-n">comparator</span><span class="tok-o">);</span>
+        <span class="tok-k">return</span> <span class="tok-o">(</span><span class="tok-n">a</span><span class="tok-o">,</span> <span class="tok-n">b</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">comparator</span><span class="tok-o">.</span><span class="tok-na">compare</span><span class="tok-o">(</span><span class="tok-n">a</span><span class="tok-o">,</span> <span class="tok-n">b</span><span class="tok-o">)</span> <span class="tok-o">&gt;=</span> <span class="tok-mi">0</span> <span class="tok-o">?</span> <span class="tok-n">a</span> <span class="tok-o">:</span> <span class="tok-n">b</span><span class="tok-o">;</span>
+    <span class="tok-o">}</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以看到它提供了两个静态方法maxBy和minBy。当然，也可以通过实现BiFunction的apply()方法，提供其他的BinaryOperator。至于BiFunction，请参见另一篇"Lambda表达式及相关"的附录A。</p>
+</div>
+<div class="paragraph">
+<p>第二个reducing方法，增加一个参数identity，表示对这个identity应用BinaryOperator</p>
+</div>
+<div class="paragraph">
+<p>第三个reducing方法，在第二个reducing方法之上，多了一个Function，等同于先应用
+Stream.map(Function)再进行Stream.reduce(Object, BinaryOperator)。</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>总结: 将stream的每个元素映射为Int, Long, 或Double类型，再转换为summary statistics。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,DoubleSummaryStatistics&gt; summarizingDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,IntSummaryStatistics&gt; summarizingInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,LongSummaryStatistics&gt; summarizingLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>注意，这三个方法分别对应IntSummaryStatistics, LongSummaryStatistics和DoubleSummaryStatistics。
+简单地讲，这三个SummaryStatistics返回的是所应用集合的计数count, 算术和sum, 最大值max, 最小值min和平均值average。DoubleSummaryStatistics略有不同。</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>求和: 计算集合元素mapper的算术和，包括三种基本类型——Int, Long和Double</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Double&gt; summingDouble(ToDoubleFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Integer&gt; summingInt(ToIntFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Long&gt; summingLong(ToLongFunction&lt;? super T&gt; mapper)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>相较于上一组返回总结的方法，这一组方法返回的是算术和。比较简单，就不展开说明了。</p>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>转化: 这一组9个接口非常重要，顾名思义，用于转化为指定的集合类型结果</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>static &lt;T,C extends Collection&lt;T&gt;&gt; Collector&lt;T,?,C&gt; toCollection(Supplier&lt;C&gt; collectionFactory)</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,List&lt;T&gt;&gt; toList()</code></p>
+</li>
+<li>
+<p><code>static &lt;T&gt; Collector&lt;T,?,Set&lt;T&gt;&gt; toSet()</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,Map&lt;K,U&gt;&gt; toMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,Map&lt;K,U&gt;&gt; toMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U,M extends Map&lt;K,U&gt;&gt; Collector&lt;T,?,M&gt; toMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction, Supplier&lt;M&gt; mapSupplier)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,ConcurrentMap&lt;K,U&gt;&gt; toConcurrentMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U&gt; Collector&lt;T,?,ConcurrentMap&lt;K,U&gt;&gt; toConcurrentMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction)</code></p>
+</li>
+<li>
+<p><code>static &lt;T,K,U,M extends ConcurrentMap&lt;K,U&gt;&gt; Collector&lt;T,?,M&gt; toConcurrentMap(Function&lt;? super T,? extends K&gt; keyMapper, Function&lt;? super T,? extends U&gt; valueMapper, BinaryOperator&lt;U&gt; mergeFunction, Supplier&lt;M&gt; mapSupplier)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><code>toCollection(Supplier&lt;C&gt; collectionFactory)</code>: 将输入元素集中放进一个新集合中，这个集合属于Collection。
+当然，很贴心地，Collecors提供了两个便捷方法<code>toList()</code>和<code>toSet()</code>，分别返回ArrayList和HashSet。</p>
+</div>
+<div class="paragraph">
+<p>接下来的三个方法都是toMap，顾名思义，就是将stream的元素放入一个map并返回。既然是map，就需要key和value。所以，最基本的<code>toMap(Function keyMapper, Function valueMapper)</code>需要分别提供对key的映射和对value的映射。</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 24. Collectors.toMap</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Map</span><span class="tok-o">&lt;</span><span class="tok-n">Student</span><span class="tok-o">,</span> <span class="tok-n">Double</span><span class="tok-o">&gt;</span> <span class="tok-n">studentToGPA</span>
+    <span class="tok-n">students</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toMap</span><span class="tok-o">(</span><span class="tok-n">Functions</span><span class="tok-o">.</span><span class="tok-na">identity</span><span class="tok-o">(),</span>        <b class="conum">(1)</b>
+                              <span class="tok-n">student</span> <span class="tok-o">-&gt;</span> <span class="tok-n">computeGPA</span><span class="tok-o">(</span><span class="tok-n">student</span><span class="tok-o">)));</span>
+
+
+<span class="tok-n">Map</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">,</span> <span class="tok-n">Student</span><span class="tok-o">&gt;</span> <span class="tok-n">studentIdToStudent</span>
+    <span class="tok-n">students</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toMap</span><span class="tok-o">(</span><span class="tok-n">Student</span><span class="tok-o">::</span><span class="tok-n">getId</span><span class="tok-o">,</span>               <b class="conum">(2)</b>
+                              <span class="tok-n">Functions</span><span class="tok-o">.</span><span class="tok-na">identity</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>代表对象本身</p>
+</li>
+<li>
+<p>用到了方法引用(<mark>Method Reference</mark>)</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>当然，调用这个toMap方法的时候，如果key有重复的(duplicated)的时候，会抛出 <code>java.lang.IllegalStateException: Duplicate key</code>异常</p>
+</div>
+<div class="paragraph">
+<p>为了解决key重复的情况，需要提供解决办法，于是调用<code>toMap(Function keyMapper, Function valueMapper, BinaryOperator mergeFunction)</code>，最后一个参数用于指定合并规则，</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 25. Collectors.toMap</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Map</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">,</span> <span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">phoneBook</span>
+    <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toMap</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getName</span><span class="tok-o">,</span>
+                            <span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getAddress</span><span class="tok-o">,</span>
+                            <span class="tok-o">(</span><span class="tok-n">s</span><span class="tok-o">,</span> <span class="tok-n">a</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span> <span class="tok-o">+</span> <span class="tok-s">&quot;, &quot;</span> <span class="tok-o">+</span> <span class="tok-n">a</span><span class="tok-o">));</span>         <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>合并规则</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>第三个toMap方法，则是在此基础上，提供一个mapSupplier——即map的factory——因为，默认toMap返回的是HashMap，当希望使用其他map的时候，则需要加上第四个参数，</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 26. Collectors.toMap3</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Map</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">,</span> <span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">phoneBook</span>
+ <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">toMap</span><span class="tok-o">(</span><span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getName</span><span class="tok-o">,</span>
+                        <span class="tok-n">Person</span><span class="tok-o">::</span><span class="tok-n">getAddress</span><span class="tok-o">,</span>
+                        <span class="tok-o">(</span><span class="tok-n">s</span><span class="tok-o">,</span> <span class="tok-n">a</span><span class="tok-o">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">s</span> <span class="tok-o">+</span> <span class="tok-s">&quot;, &quot;</span> <span class="tok-o">+</span> <span class="tok-n">a</span><span class="tok-o">,</span>
+                        <span class="tok-n">TreeMap</span><span class="tok-o">::</span><span class="tok-k">new</span><span class="tok-o">));</span>                 <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>指定Map的构造方法，此处是TreeMap</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div style="page-break-after: always;"></div>
+<div class="paragraph">
+<p>最后，<code>collectingAndThen(Collector downStream, Function finisher)</code>会额外做一个转化，将一个Collector转化为另一种类型，</p>
+</div>
+<div class="paragraph">
+<p>Collectors.toMap2</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">people</span>
+     <span class="tok-o">=</span> <span class="tok-n">people</span><span class="tok-o">.</span><span class="tok-na">stream</span><span class="tok-o">().</span><span class="tok-na">collect</span><span class="tok-o">(</span><span class="tok-n">collectingAndThen</span><span class="tok-o">(</span><span class="tok-n">toList</span><span class="tok-o">(),</span> <span class="tok-n">Collections</span><span class="tok-o">::</span><span class="tok-n">unmodifiableList</span><span class="tok-o">));</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+        </section>
+
+        <aside id="sidebar">
+          
+
+          
+            <p class="repo-owner"><a href="https://github.com/codingwen/codingwen.github.io">codingwen.github.io</a> is maintained by <a href="https://github.com/codingwen">codingwen</a>.</p>
+          
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</p>
+          <p><ul class="sectlevel1">
+<li><a href="#概览">概览</a>
+<ul class="sectlevel2">
+<li><a href="#定义definition">定义(Definition)</a></li>
+<li><a href="#对比stream-vs-collection">对比(Stream vs Collection)</a></li>
+<li><a href="#api概览">API概览</a></li>
+<li><a href="#包结构">包结构</a></li>
+</ul>
+</li>
+<li><a href="#常用操作stream-operations">常用操作(Stream operations)</a>
+<ul class="sectlevel2">
+<li><a href="#intermediate操作">intermediate操作</a></li>
+<li><a href="#terminal操作">terminal操作</a></li>
+</ul>
+</li>
+<li><a href="#stream-construction构造方法">Stream construction(构造方法)</a>
+<ul class="sectlevel2">
+<li><a href="#built-in内置">built-in(内置)</a></li>
+<li><a href="#collection">collection</a></li>
+<li><a href="#array">array</a></li>
+<li><a href="#file">file</a></li>
+<li><a href="#streamsupport">streamsupport</a></li>
+</ul>
+</li>
+<li><a href="#numeric-streams">Numeric Streams</a>
+<ul class="sectlevel2">
+<li><a href="#intstream">IntStream</a></li>
+<li><a href="#longstream">LongStream</a></li>
+<li><a href="#doublestream">DoubleStream</a></li>
+</ul>
+</li>
+<li><a href="#appxa">Appendix A: Stream操作一览</a></li>
+<li><a href="#appxb">Appendix B: Optional介绍</a>
+<ul class="sectlevel2">
+<li><a href="#construction-4">construction</a></li>
+<li><a href="#consume">consume</a></li>
+<li><a href="#filtermap">filter|map</a></li>
+</ul>
+</li>
+<li><a href="#appxc">Appendix C: Collectors一览</a></li>
+</ul>          </p>
+        </aside>
+      </div>
+    </div>
+
+    
+  </body>
+</html>
