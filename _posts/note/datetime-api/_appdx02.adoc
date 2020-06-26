@@ -1,0 +1,23 @@
+= java.util.Date和java.time类的映射
+
+
+[cols="1,1", options="header"]
+|===
+| ``java.util Functionality`` 
+| ``java.time Functionality``
+
+| ``java.util.Date`` 
+| ``java.time.Instant``
+
+| ``java.util.GregorianCalendar`` 
+| ``java.time.ZonedDateTime``
+
+| ``java.util.TimeZone`` 
+| ``java.time.ZoneId or java.time.ZoneOffset``
+
+| ``GregorianCalendar with the date set to 1970-01-01 ``
+| ``java.time.LocalTime``
+
+| ``GregorianCalendar with time set to 00:00`` 
+| ``java.time.LocalDate``
+|===

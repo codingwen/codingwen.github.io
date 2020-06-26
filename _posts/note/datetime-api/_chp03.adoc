@@ -1,0 +1,731 @@
+= Standard Calendar
+
+Date-Time API 的核心是``java.time``包，其中的类都是基于ISO标准的日历系统——Gregorian日历，问世于1582年。
+
+The core classes in the Date-Time API have names such as ``LocalDateTime``, ``ZonedDateTime``, and ``OffsetDateTime``. 
+
+== Overview
+
+表示时间有两种方式
+
+1. 人类时间：采用人类术语，年月日时分秒等，便于阅读
+2. 机器时间：从一个起点开始的持续的时间线，称为epoch，精确到纳秒
+
+Date-Time API提供了众多的类用来表示日期和时间，有些是用来显示机器时间的，另外是为了便于人类阅读的
+
+因此，在使用Date-Time API的时候，首先要决定的就是要从哪个方面表示时间：机器时间还是人类时间，是否包括年月日等。
+
+== DayOfWeek and Month Enums
+
+- ``DayOfWeek``由7个常量组成，表示周一到周日，整数值从1(Monday)到7(Sunday)。另外，还提供了一些方便的方法。
+- ``Month``表示从一月到十二月，整数值从1(January)到12(December)
+
+它们都提供``getDisplayName(TextStyle, Locale)``方法，根据Locale和style显示名称。
+
+== Date Classes
+
+在不考虑时间和时区的情况下，Date-Time API提供了4个类专门处理日期信息：``LocalDate``,``YearMonth``,``MonthDay`` 和 ``Year``。
+
+=== LocalDate
+表示没有时间的日期，例如
+
+====
+[source,java]
+----
+LocalDate date = LocalDate.of(2000, Month.NOVEMBER, 20);
+LocalDate nextWed = date.with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY));
+
+LocalDate date = LocalDate.of(2000, Month.NOVEMBER, 20);
+TemporalAdjuster adj = TemporalAdjusters.next(DayOfWeek.WEDNESDAY);
+LocalDate nextWed = date.with(adj);
+System.out.printf("For the date of %s, the next Wednesday is %s.%n",
+                  date, nextWed);
+----
+
+> For the date of 2000-11-20, the next Wednesday is 2000-11-22.
+
+=== YearMonth
+
+表示指定年的月份。
+
+====
+[source,java]
+----
+YearMonth date = YearMonth.now();
+System.out.printf("%s: %d%n", date, date.lengthOfMonth());
+
+YearMonth date2 = YearMonth.of(2010, Month.FEBRUARY);
+System.out.printf("%s: %d%n", date2, date2.lengthOfMonth());
+
+YearMonth date3 = YearMonth.of(2012, Month.FEBRUARY);
+System.out.printf("%s: %d%n", date3, date3.lengthOfMonth());
+----
+
+> 2013-06: 30
+2010-02: 28
+2012-02: 29
+
+=== MonthDay
+
+表示指定月份的日期，例如
+
+
+====
+[source,java]
+----
+MonthDay date = MonthDay.of(Month.FEBRUARY, 29);
+boolean validLeapYear = date.isValidYear(2010);
+----
+
+=== Year
+
+顾名思义，表示年份。
+
+
+====
+[source,java]
+----
+boolean validLeapYear = Year.of(2012).isLeap();
+----
+
+== Date and Time classes
+
+=== LocalTime
+
+类似其他以``Local``开头的类，但只处理时间，例如电影时间、店铺开门关门时间，也可以用来创建数字时钟，例如
+
+
+====
+[source,java]
+----
+LocalTime thisSec;
+
+for (;;) {
+    thisSec = LocalTime.now();
+
+    // implementation of display code is left to the reader
+    display(thisSec.getHour(), thisSec.getMinute(), thisSec.getSecond());
+}
+----
+
+> 它和时区无关
+
+=== LocalDateTime
+
+LocalDate和LocalTime的结合，既处理Date，也处理Time，但是不包括时区。如果要考虑时区，需要用``ZonedDateTime``或``OffsetDateTime``。
+
+除了``now()``方法之外，它提供了众多的``of()``方法用来调整时间。``from()``用来将其他的temporal format转化为``LocalDateTime``。例如
+
+
+====
+[source,java]
+----
+System.out.printf("now: %s%n", LocalDateTime.now());
+
+System.out.printf("Apr 15, 1994 @ 11:30am: %s%n",
+                  LocalDateTime.of(1994, Month.APRIL, 15, 11, 30));
+
+System.out.printf("now (from Instant): %s%n",
+                  LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
+
+System.out.printf("6 months from now: %s%n",
+                  LocalDateTime.now().plusMonths(6));
+
+System.out.printf("6 months ago: %s%n",
+                  LocalDateTime.now().minusMonths(6));
+----
+
+> now: 2013-07-24T17:13:59.985
+Apr 15, 1994 @ 11:30am: 1994-04-15T11:30
+now (from Instant): 2013-07-24T17:14:00.479
+6 months from now: 2014-01-24T17:14:00.480
+6 months ago: 2013-01-24T17:14:00.481
+
+== Time Zone and Offset Classes
+
+Date-Time API 提供了两个类用来设定时区或者offset
+
+- ``ZoneId``指定了一个时区标识，提供了``Instant``和``LocalDateTime``之间互相转化的规则
+- ``ZoneOffset``指定了一个和格林尼治/UTC之间的时区差
+
+这是一个打印出所有时区的示例
+
+
+====
+[source,java]
+----
+Set<String> allZones = ZoneId.getAvailableZoneIds();
+LocalDateTime dt = LocalDateTime.now();
+
+// Create a List using the set of zones and sort it.
+List<String> zoneList = new ArrayList<String>(allZones);
+Collections.sort(zoneList);
+
+...
+
+for (String s : zoneList) {
+    ZoneId zone = ZoneId.of(s);
+    ZonedDateTime zdt = dt.atZone(zone);
+    ZoneOffset offset = zdt.getOffset();
+    int secondsOfHour = offset.getTotalSeconds() % (60 * 60);
+    String out = String.format("%35s %10s%n", zone, offset);
+
+    // Write only time zones that do not have a whole hour offset
+    // to standard out.
+    if (secondsOfHour != 0) {
+        System.out.printf(out);
+    }
+    ...
+}
+----
+
+> America/Caracas     -04:30
+     America/St_Johns     -02:30
+        Asia/Calcutta     +05:30
+         Asia/Colombo     +05:30
+           Asia/Kabul     +04:30
+       Asia/Kathmandu     +05:45
+        Asia/Katmandu     +05:45
+         Asia/Kolkata     +05:30
+         Asia/Rangoon     +06:30
+          Asia/Tehran     +04:30
+   Australia/Adelaide     +09:30
+Australia/Broken_Hill     +09:30
+     Australia/Darwin     +09:30
+      Australia/Eucla     +08:45
+        Australia/LHI     +10:30
+  Australia/Lord_Howe     +10:30
+      Australia/North     +09:30
+      Australia/South     +09:30
+ Australia/Yancowinna     +09:30
+  Canada/Newfoundland     -02:30
+         Indian/Cocos     +06:30
+                 Iran     +04:30
+              NZ-CHAT     +12:45
+      Pacific/Chatham     +12:45
+    Pacific/Marquesas     -09:30
+      Pacific/Norfolk     +11:30
+      
+=== Date-Time API classes
+
+提供了3个temporal-based classed,是基于时区的
+
+- ``ZonedDateTime``: handles a date and time with a corresponding time zone with a time zone offset from Greenwich/UTC
+- ``OffsetDateTime``:handles a date and time with a corresponding time zone offset from Greenwich/UTC, without a time zone ID
+- ``OffsetTime``: handles time with a corresponding time zone offset from Greenwich/UTC, without a time zone ID
+
+其中只有``ZonedDateTime``使用``ZonedRules``,可以决定一个特定时区的偏移量
+
+=== ZonedDateTime
+
+其实是``LocalDateTime``和``ZoneId``的组合。用来表示完整的日期和时间以及时区。示例
+
+
+====
+[source,java]
+----
+DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
+
+// Leaving from San Francisco on July 20, 2013, at 7:30 p.m.
+LocalDateTime leaving = LocalDateTime.of(2013, Month.JULY, 20, 19, 30);
+ZoneId leavingZone = ZoneId.of("America/Los_Angeles"); 
+ZonedDateTime departure = ZonedDateTime.of(leaving, leavingZone);
+
+try {
+    String out1 = departure.format(format);
+    System.out.printf("LEAVING:  %s (%s)%n", out1, leavingZone);
+} catch (DateTimeException exc) {
+    System.out.printf("%s can't be formatted!%n", departure);
+    throw exc;
+}
+
+// Flight is 10 hours and 50 minutes, or 650 minutes
+ZoneId arrivingZone = ZoneId.of("Asia/Tokyo"); 
+ZonedDateTime arrival = departure.withZoneSameInstant(arrivingZone)
+                                 .plusMinutes(650);
+
+try {
+    String out2 = arrival.format(format);
+    System.out.printf("ARRIVING: %s (%s)%n", out2, arrivingZone);
+} catch (DateTimeException exc) {
+    System.out.printf("%s can't be formatted!%n", arrival);
+    throw exc;
+}
+
+if (arrivingZone.getRules().isDaylightSavings(arrival.toInstant())) 
+    System.out.printf("  (%s daylight saving time will be in effect.)%n",
+                      arrivingZone);
+else
+    System.out.printf("  (%s standard time will be in effect.)%n",
+                      arrivingZone);
+----
+
+> LEAVING:  Jul 20 2013  07:30 PM (America/Los_Angeles)
+ARRIVING: Jul 21 2013  10:20 PM (Asia/Tokyo)
+  (Asia/Tokyo standard time will be in effect.)
+  
+=== OffsetDateTime
+
+其实是``LocalDateTime``和``ZoneOffset``的组合，表示完整的日期时间以及与UTC时间之间的时区偏移量，例如
+
+
+====
+[source,java]
+----
+// Find the last Thursday in July 2013.
+LocalDateTime localDate = LocalDateTime.of(2013, Month.JULY, 20, 19, 30);
+ZoneOffset offset = ZoneOffset.of("-08:00");
+
+OffsetDateTime offsetDate = OffsetDateTime.of(localDate, offset);
+OffsetDateTime lastThursday =
+        offsetDate.with(TemporalAdjusters.lastInMonth(DayOfWeek.THURSDAY));
+System.out.printf("The last Thursday in July 2013 is the %sth.%n",
+                   lastThursday.getDayOfMonth());
+----
+
+> The last Thursday in July 2013 is the 25th.
+
+=== OffsetTime
+
+其实是``LocalTime``和``ZoneOffset``的组合，表示时间以及与UTC时间之间的时区偏移量
+
+== Instant Classes
+
+Date-Time API的一个核心类就是``Instant``，表示时间线上的起始纳秒。它用来生成时间戳表示机器时间。例如
+
+
+====
+[source,java]
+----
+import java.time.Instant;
+
+Instant timestamp = Instant.now();
+----
+
+它返回的是和称为EPOCH的时间(1970-01-01T00:00:00Z)之间的时间差。在epoch之前的时间返回负数。
+
+``Instant``提供了许多操作时间的方法。
+
+它无法处理人类的时间单元，诸如年月日等，必须通过绑定时区，转化为诸如``LocalDate``，``LocalTime``之类才可以。例如
+
+
+====
+[source,java]
+----
+Instant timestamp;
+...
+LocalDateTime ldt = LocalDateTime.ofInstant(timestamp, ZoneId.systemDefault());
+System.out.printf("%s %d %d at %d:%d%n", ldt.getMonth(), ldt.getDayOfMonth(),
+                  ldt.getYear(), ldt.getHour(), ldt.getMinute());
+----
+
+== Parsing and Formatting
+
+通过提供``DateTimeFormatter``的pattern，temporal-based classes可以调用parse或者format将字符串转换为类或者进行展示。
+
+``DateTimeFormatter``提供了若干预定义的formatters,也可以自定义。
+parse或者format会分别抛出``DateTimeParseException``和``DateTimeException``异常。
+
+=== Parsing
+
+LocalDate使用一个参数的方法``parse(CharSequence)``使用``ISO_LOCAL_DATE`` formatter。如果要使用其他的formatter，需要使用两个参数的``parse(CharSequence, DateTimeFormatter)``方法。例如``LocalDate date = LocalDate.parse(str, DateTimeFormatter.BASIC_ISO_DATE);``，当然，也可以使用自定义的formatter，例如
+
+
+====
+[source,java]
+----
+String input = ...;
+try {
+    DateTimeFormatter formatter =
+                      DateTimeFormatter.ofPattern("MMM d yyyy");
+    LocalDate date = LocalDate.parse(input, formatter);
+    System.out.printf("%s%n", date);
+}
+catch (DateTimeParseException exc) {
+    System.out.printf("%s is not parsable!%n", input);
+    throw exc;      // Rethrow the exception.
+}
+// 'date' has been successfully parsed
+----
+
+关于``DateTimeFormatter``的更多信息请参考[full list of symbols](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns)
+
+=== Formatting
+
+方法``format(DateTimeFormatter)``将一个temporal-based类转化为string。例如
+
+
+====
+[source,java]
+----
+ZoneId leavingZone = ...;
+ZonedDateTime departure = ...;
+
+try {
+    DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
+    String out = departure.format(format);
+    System.out.printf("LEAVING:  %s (%s)%n", out, leavingZone);
+}
+catch (DateTimeException exc) {
+    System.out.printf("%s can't be formatted!%n", departure);
+    throw exc;
+}
+----
+
+== Temporal Package
+
+包``java.time.temporal ``提供了众多接口、类和枚举用来支撑date和time，特别是一些计算方法。
+
+这些接口被用于最低的级别，也就是声明的常量要使用具体类，而不是接口，好比我们会声明String类而不是CharSequence一样。
+
+=== Temporal and TemporalAccessor
+
+接口``Temporal``提供了计算temporal-based类的计算框架，并且由类进行了实现，比如Instant,LocalDateTime等。而``TemporalAccessor``接口提供了Temporal接口的只读版本。
+
+Temporal和TemporalAccessor接口用``TemporalField``类型定义了众多的fields。``ChronoField``是其中一个实现类，提供了丰富的定义好了的常量集。这些fields的单位都由``TemporalUnit``接口指定。同样的，``ChronoUnit``是其实现之一。
+
+Temporal接口的计算日期时间的方法参数必须是``TemporalAmount``类型，类``Period``和``Duration``是其中两个实现。
+
+=== ChronoField and IsoFields
+
+``ChronoField``实现了``TemporalField``，提供了众多常量用来读取日期和时间。
+
+另外还有``IsoFields``，``WeekFields``和``JulianFields``。
+
+=== ChronoUnit
+
+``ChronoUnit``实现了``TemporalUnit``接口，提供了基于日期和时间的标准单位。但并非所有的类都支持所有的ChronoUnit。``TemporalAccessor.isSupported(TemporalUnit)``可用来验证是否支持。
+
+== Temporal Adjuster
+
+位于``java.time.temporal``包中，提供方法接收*Temporal*，返回调整后的值。
+
+=== Predefined Adjusters
+
+The ``TemporalAdjusters`` class提供了一组设定好了的方法用来进行调整，这些都是静态工具方法。看示例
+
+
+====
+[source,java]
+----
+LocalDate date = LocalDate.of(2000, Month.OCTOBER, 15);
+DayOfWeek dotw = date.getDayOfWeek();
+System.out.printf("%s is on a %s%n", date, dotw);
+
+System.out.printf("first day of Month: %s%n",
+                  date.with(TemporalAdjusters.firstDayOfMonth()));
+System.out.printf("first Monday of Month: %s%n",
+                  date.with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY)));
+System.out.printf("last day of Month: %s%n",
+                  date.with(TemporalAdjusters.lastDayOfMonth()));
+System.out.printf("first day of next Month: %s%n",
+                  date.with(TemporalAdjusters.firstDayOfNextMonth()));
+System.out.printf("first day of next Year: %s%n",
+                  date.with(TemporalAdjusters.firstDayOfNextYear()));
+System.out.printf("first day of Year: %s%n",
+                  date.with(TemporalAdjusters.firstDayOfYear()));
+----
+
+> 2000-10-15 is on a SUNDAY
+first day of Month: 2000-10-01
+first Monday of Month: 2000-10-02
+last day of Month: 2000-10-31
+first day of next Month: 2000-11-01
+first day of next Year: 2001-01-01
+first day of Year: 2000-01-01
+
+=== Custom Adjusters
+
+如果需要自定义adjuster的话，需要实现*TemporalAdjuster*接口，下面是一个示例
+
+
+====
+[source,java]
+----
+public Temporal adjustInto(Temporal input) {
+    LocalDate date = LocalDate.from(input);
+    int day;
+    if (date.getDayOfMonth() < 15) {
+        day = 15;
+    } else {
+        day = date.with(TemporalAdjusters.lastDayOfMonth()).getDayOfMonth();
+    }
+    date = date.withDayOfMonth(day);
+    if (date.getDayOfWeek() == DayOfWeek.SATURDAY ||
+        date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+        date = date.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
+    }
+
+    return input.with(date);
+}
+----
+
+调用
+
+``LocalDate nextPayday = date.with(new PaydayAdjuster());``
+
+输出
+
+> Given the date:  2013 Jun 3
+the next payday: 2013 Jun 14
+
+Given the date:  2013 Jun 18
+the next payday: 2013 Jun 28
+
+== Temporal Query
+
+用来从一个temporal-based 对象中间检索信息
+
+=== Predefined Queries
+
+The ``TemporalQueries`` class提供了一组现成的工具方法。示例
+
+
+====
+[source,java]
+----
+TemporalQueries query = TemporalQueries.precision();
+System.out.printf("LocalDate precision is %s%n",
+                  LocalDate.now().query(query));
+System.out.printf("LocalDateTime precision is %s%n",
+                  LocalDateTime.now().query(query));
+System.out.printf("Year precision is %s%n",
+                  Year.now().query(query));
+System.out.printf("YearMonth precision is %s%n",
+                  YearMonth.now().query(query));
+System.out.printf("Instant precision is %s%n",
+                  Instant.now().query(query));
+----
+
+> LocalDate precision is Days
+LocalDateTime precision is Nanos
+Year precision is Years
+YearMonth precision is Months
+Instant precision is Nanos
+
+=== Custom Queries
+
+自定义的query需要实现``TemporalQuery``接口或者使用lambda expression。示例
+
+
+====
+[source,java]
+----
+// Returns true if the passed-in date occurs during one of the
+// family vacations. Because the query compares the month and day only,
+// the check succeeds even if the Temporal types are not the same.
+public Boolean queryFrom(TemporalAccessor date) {
+    int month = date.get(ChronoField.MONTH_OF_YEAR);
+    int day   = date.get(ChronoField.DAY_OF_MONTH);
+
+    // Disneyland over Spring Break
+    if ((month == Month.APRIL.getValue()) && ((day >= 3) && (day <= 8)))
+        return Boolean.TRUE;
+
+    // Smith family reunion on Lake Saugatuck
+    if ((month == Month.AUGUST.getValue()) && ((day >= 8) && (day <= 14)))
+        return Boolean.TRUE;
+
+    return Boolean.FALSE;
+}
+----
+
+或者
+
+
+====
+[source,java]
+----
+// Invoking the query without using a lambda expression.
+Boolean isFamilyVacation = date.query(new FamilyVacations());
+
+// Invoking the query using a lambda expression.
+Boolean isFamilyBirthday = date.query(FamilyBirthdays::isFamilyBirthday);
+
+if (isFamilyVacation.booleanValue() || isFamilyBirthday.booleanValue())
+    System.out.printf("%s is an important date!%n", date);
+else
+    System.out.printf("%s is not an important date.%n", date);
+----
+
+== Period and Duration
+
+当需要用到时间的数量的时候，类``Duration``, ``Period``, 或``ChronoUnit.between``方法可供使用。
+
+*Duration*使用time-based值衡量时间数量，如秒，纳秒等，而*Period*使用date-based值衡量时间数量，如年月等。
+
+> 一天的*Duration*是精确的24小时，而一天的*Period*根据时区会有所不同
+
+=== Duration
+
+*Duration*适合用来测量机器时间，例如使用**Instant**的对象。*Duration*可以存在负值。示例
+
+
+====
+[source,java]
+----
+Instant t1, t2;
+...
+long ns = Duration.between(t1, t2).toNanos();
+
+Instant start;
+...
+Duration gap = Duration.ofSeconds(10);
+Instant later = start.plus(gap);
+----
+
+*Duration* 和timeline没有关系。
+
+=== ChronoUnit
+
+这个枚举类前面讨论过，它的``between``方法应用于所有temporal-based对象。例如
+
+
+====
+[source,java]
+----
+import java.time.Instant;
+import java.time.temporal.Temporal;
+import java.time.temporal.ChronoUnit;
+
+Instant previous, current, gap;
+...
+current = Instant.now();
+if (previous != null) {
+    gap = ChronoUnit.MILLIS.between(previous,current);
+}
+...
+----
+
+=== Period
+
+date-based 时间数量使用period，它提供了大量的get方法，诸如``getMonths``，``getDays``等。
+代码示例
+
+
+====
+[source,java]
+----
+LocalDate today = LocalDate.now();
+LocalDate birthday = LocalDate.of(1960, Month.JANUARY, 1);
+
+Period p = Period.between(birthday, today);
+long p2 = ChronoUnit.DAYS.between(birthday, today);
+System.out.println("You are " + p.getYears() + " years, " + p.getMonths() +
+                   " months, and " + p.getDays() +
+                   " days old. (" + p2 + " days total)");
+----
+
+== Clock
+
+大多数``temporal-based``类提供了无参方法``now``提供当前时间。同时也提供了一个含Clock参数的构造方法``now(Clock)``。当前时间依赖于时区。
+
+Clock是抽象类，提供了几个工厂方法
+
+- ``Clock.offset(Clock, Duration)``返回时间落后duration的时间
+- ``Clock.systemUTC()``返回格林尼治时区
+- ``Clock.fixed(Instant, ZoneId)``返回相同的Instant，这个instant不会变
+
+== Non-ISO Date Conversion
+
+``java.time.chrono``包提供了一些预定义的non ISO-based日历，例如
+Japanese, Hijrah, Minguo, Thai Buddhist.
+
+于是引出ISO-based classes和non ISO-based classes之间如何转换的问题。
+
+代码示例
+
+
+====
+[source,java]
+----
+LocalDateTime date = LocalDateTime.of(2013, Month.JULY, 20, 19, 30);
+JapaneseDate jdate     = JapaneseDate.from(date);
+HijrahDate hdate       = HijrahDate.from(date);
+MinguoDate mdate       = MinguoDate.from(date);
+ThaiBuddhistDate tdate = ThaiBuddhistDate.from(date);
+----
+
+
+====
+[source,java]
+----
+public static String toString(LocalDate localDate, Chronology chrono) {
+    if (localDate != null) {
+        Locale locale = Locale.getDefault(Locale.Category.FORMAT);
+        ChronoLocalDate cDate;
+        if (chrono == null) {
+            chrono = IsoChronology.INSTANCE;
+        }
+        try {
+            cDate = chrono.date(localDate);
+        } catch (DateTimeException ex) {
+            System.err.println(ex);
+            chrono = IsoChronology.INSTANCE;
+            cDate = localDate;
+        }
+        DateTimeFormatter dateFormatter =
+            DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+                             .withLocale(locale)
+                             .withChronology(chrono)
+                             .withDecimalStyle(DecimalStyle.of(locale));
+        String pattern = "M/d/yyyy GGGGG";
+        return dateFormatter.format(cDate);
+    } else {
+        return "";
+    }
+}
+----
+
+转化为ISO-based classes
+
+
+====
+[source,java]
+----
+public static LocalDate fromString(String text, Chronology chrono) {
+    if (text != null && !text.isEmpty()) {
+        Locale locale = Locale.getDefault(Locale.Category.FORMAT);
+        if (chrono == null) {
+           chrono = IsoChronology.INSTANCE;
+        }
+        String pattern = "M/d/yyyy GGGGG";
+        DateTimeFormatter df = new DateTimeFormatterBuilder().parseLenient()
+                              .appendPattern(pattern)
+                              .toFormatter()
+                              .withChronology(chrono)
+                              .withDecimalStyle(DecimalStyle.of(locale));
+        TemporalAccessor temporal = df.parse(text);
+        ChronoLocalDate cDate = chrono.date(temporal);
+        return LocalDate.from(cDate);
+    }
+return null;
+}
+----
+
+== Legacy Date-Time Code
+
+在java8的Date-Time API之前，都是使用``java.util.Date``, ``java.util.Calendar``, ``java.util.TimeZone``，这些类有些问题
+
+- ``Calendar``不是类型安全类
+- 这些类不是线程安全的
+- 非自然的月份数常常导致错误，比如1月份从0开始
+
+Java8提供了一些方法便于``java.time``和``java.util``之间的对象互相转化
+
+- ``Calandar.toInstant()``从Calendar到Instant
+- ``GregorianCalendar.toZonedDateTime()``从GregorianCalendar到ZonedDateTime
+- ``GregorianCalendar.from(ZonedDateTime) ``从ZonedDateTime到GregorianCalendar
+- ``Date.from(Instant)``从Instant到Date
+- ``Date.toInstant()``从Date到Instant
+- ``TimeZone.toZoneId()``从TimeZone到ZoneId
+
+代码示例
+
+
+====
+[source,java]
+----
+Calendar now = Calendar.getInstance();
+ZonedDateTime zdt = ZonedDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault()));
+----

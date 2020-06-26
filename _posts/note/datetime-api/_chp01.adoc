@@ -1,0 +1,8 @@
+
+= 概览
+
+Java Doc footnote:1[https://docs.oracle.com/javase/8/docs/technotes/guides/datetime/index.html]
+
+从java8开始引入的Date-Time API，涵盖了date和time的大多数重要特征，``java.time``包中的核心类使用的是ISO-8601标准的日历系统作为默认日历。可以使用``java.time.chrono``包中的其他非ISO日历以及一些预设好的纪年，比如伊斯兰或者佛陀。
+
+Date-Time API 使用了Unicode Common Locale Data Repository(CLDR) footnote:2[http://cldr.unicode.org/]，以及Time-Zone Database (TZDB) footnote:3[http://www.iana.org/time-zones]

@@ -1,0 +1,73 @@
+= Quick Reference
+
+====
+[source,java]
+----
+Instant instant = Instant.now();
+
+//Instant to seconds
+long seconds = instant.getEpochSecond();
+long millis = instant.toEpochMilli();
+
+//Instant to OffsetDateTime
+OffsetDateTime offsetDateTime = instant.atOffset(ZoneOffset zoneOffset);
+
+//Instant to ZonedDateTime
+ZonedDateTime zonedDateTime = instant.atZone(ZoneId zoneId);
+
+//Instant to LocalDateTime
+LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant instant, ZoneId zoneId);
+
+//OffsetDateTime to LocalDateTime
+offsetDateTime.toLocalDateTime();
+
+//OffsetDateTime to Instant
+offsetDateTime.toInstant();
+
+//OffsetDateTime to seconds
+offsetDateTime.toEpochSecond();
+
+//OffsetDateTime to ZonedDateTime
+offsetDateTime.toZonedDateTime();
+
+
+//ZonedDateTime to Instant
+zonedDateTime.toInstant();
+
+//ZonedDateTime to LocalDateTime
+zonedDateTime.toLocalDateTime();
+
+//ZonedDateTime to OffsetDateTime
+zonedDateTime.toOffsetDateTime();
+
+//ZonedDateTime to seconds
+zonedDateTime.toEpochSecond();
+
+
+//LocalDateTime to Instant
+Instant instant = localDateTime.toInstant(ZoneOffset zoneOffset);
+
+//LocalDateTime to seconds
+localDateTime.toEpochSecond(ZoneOffset zoneOffset)
+
+//LocalDateTime to OffsetDateTime
+localDateTime.atOffset(ZoneOffset zoneOffset)
+
+//LocalDateTime to ZonedDateTime
+ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId zoneId);
+ZonedDateTime.ofInstant(LocalDateTime localDateTime, ZoneOffset offset, ZoneId zone);
+
+//seconds to Instant
+Instant instant = Instant.ofEpochSecond(seconds);
+Instant instant = Instant.ofEpochMilli(millis);
+
+//seconds to LocalDateTime
+LocalDateTime.ofEpochSecond(long epochSecond, int nanoOfSecond, ZoneOffset offset);
+LocalDateTime.ofInstant(Instant instant, ZoneId zone);
+
+//seconds to OffsetDateTime
+OffsetDateTime.ofInstant(Instant instant, ZoneId zone);
+
+//seconds to ZonedDateTime
+ZonedDateTime.ofInstant(Instant instant, ZoneId zone);
+----
