@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=cc838b68c1465a4dfc75281723bce88b84a8c5b7" media="screen" type="text/css">
+    <link rel="stylesheet" href="/assets/css/print.css" media="print" type="text/css">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Java8 DateTime API | codingwen’s land</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="Java8 DateTime API" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Unresolved directive in #excerpt - include::_chp01.adoc[leveloffset=+1]" />
+<meta property="og:description" content="Unresolved directive in #excerpt - include::_chp01.adoc[leveloffset=+1]" />
+<link rel="canonical" href="http://ikoding.net/java8-datetim-api.html" />
+<meta property="og:url" content="http://ikoding.net/java8-datetim-api.html" />
+<meta property="og:site_name" content="codingwen’s land" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-26T01:09:40+00:00" />
+<script type="application/ld+json">
+{"description":"Unresolved directive in #excerpt - include::_chp01.adoc[leveloffset=+1]","@type":"BlogPosting","headline":"Java8 DateTime API","dateModified":"2020-06-26T01:09:40+00:00","url":"http://ikoding.net/java8-datetim-api.html","datePublished":"2020-06-26T01:09:40+00:00","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://ikoding.net/favicon.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"http://ikoding.net/java8-datetim-api.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <a href="http://ikoding.net/">
+          <h1>codingwen's land</h1>
+        </a>
+        <h2>拖延是因为不够热爱</h2>
+        
+          <a href="https://github.com/codingwen/codingwen.github.io" class="button"><small>View project on</small> GitHub</a>
+        
+        
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <div class="sect1">
+<h2 id="概览">概览</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Java Doc <sup class="footnote" id="_footnote_1">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>从java8开始引入的Date-Time API，涵盖了date和time的大多数重要特征，<code>java.time</code>包中的核心类使用的是ISO-8601标准的日历系统作为默认日历。可以使用<code>java.time.chrono</code>包中的其他非ISO日历以及一些预设好的纪年，比如伊斯兰或者佛陀。</p>
+</div>
+<div class="paragraph">
+<p>Date-Time API 使用了Unicode Common Locale Data Repository(CLDR) <sup class="footnote" id="_footnote_2">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>，以及Time-Zone Database (TZDB) <sup class="footnote" id="_footnote_3">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="接口">接口</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.time</code>: date, time, date and time combined, time zones, instants, duration, and clocks.</p>
+</li>
+<li>
+<p><code>java.time.chrono</code>: API for representing calendar systems other than ISO-8601. Several predefined chronologies are provided and you can also define your own chronology.</p>
+</li>
+<li>
+<p><code>java.time.format</code>: Classes for formatting and parsing dates and time</p>
+</li>
+<li>
+<p><code>java.time.temporal</code>: Extended API, primarily for framework and library writers, allowing interoperations between the date and time classes, querying, and adjustment. Fields and units are defined in this package.</p>
+</li>
+<li>
+<p><code>java.time.zone</code>: Classes that support time zones, offsets from time zones, and time zone rules.</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="design-principles">Design Principles</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>clear</p>
+</li>
+<li>
+<p>fluent</p>
+</li>
+<li>
+<p>immutable</p>
+</li>
+<li>
+<p>extensible</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="method-naming-conventions">Method Naming Conventions</h3>
+<div class="paragraph">
+<p>由于大多数class是immutable的，因此没有set方法。下表列出了一些常用的方法前缀</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. 方法列表</caption>
+<colgroup>
+<col style="width: 9.0909%;">
+<col style="width: 18.1818%;">
+<col style="width: 72.7273%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Prefix</th>
+<th class="tableblock halign-left valign-top">Method Type</th>
+<th class="tableblock halign-left valign-top">Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>of</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">static factory</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Creates an instance where the factory is primarily validating the input parameters, not converting them</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>from</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">static factory</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Converts the input parameters to an instance of the target class, which may involve losing information from the input</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>parse</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">static factory</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Parses the input string to produce an instance of the target class</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>format</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses the specified formatter to format the values in the temporal object to produce a string</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>get</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns a part of the state of the target object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>is</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Queries the state of the target object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>with</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns a copy of the target object with one element changed; this is the immutable equivalent to a set method on a JavaBean</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>plus</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns a copy of the target object with an amount of time added</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>minus</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns a copy of the target object with an amount of time subtracted</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>to</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Converts this object to another type</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>at</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">instance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Combines this object with another.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="standard-calendar">Standard Calendar</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Date-Time API 的核心是<code>java.time</code>包，其中的类都是基于ISO标准的日历系统——Gregorian日历，问世于1582年。</p>
+</div>
+<div class="paragraph">
+<p>The core classes in the Date-Time API have names such as <code>LocalDateTime</code>, <code>ZonedDateTime</code>, and <code>OffsetDateTime</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="overview">Overview</h3>
+<div class="paragraph">
+<p>表示时间有两种方式</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>人类时间：采用人类术语，年月日时分秒等，便于阅读</p>
+</li>
+<li>
+<p>机器时间：从一个起点开始的持续的时间线，称为epoch，精确到纳秒</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Date-Time API提供了众多的类用来表示日期和时间，有些是用来显示机器时间的，另外是为了便于人类阅读的</p>
+</div>
+<div class="paragraph">
+<p>因此，在使用Date-Time API的时候，首先要决定的就是要从哪个方面表示时间：机器时间还是人类时间，是否包括年月日等。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="dayofweek-and-month-enums">DayOfWeek and Month Enums</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>DayOfWeek</code>由7个常量组成，表示周一到周日，整数值从1(Monday)到7(Sunday)。另外，还提供了一些方便的方法。</p>
+</li>
+<li>
+<p><code>Month</code>表示从一月到十二月，整数值从1(January)到12(December)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>它们都提供<code>getDisplayName(TextStyle, Locale)</code>方法，根据Locale和style显示名称。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="date-classes">Date Classes</h3>
+<div class="paragraph">
+<p>在不考虑时间和时区的情况下，Date-Time API提供了4个类专门处理日期信息：<code>LocalDate</code>,<code>YearMonth</code>,<code>MonthDay</code> 和 <code>Year</code>。</p>
+</div>
+<div class="sect3">
+<h4 id="localdate">LocalDate</h4>
+<div class="paragraph">
+<p>表示没有时间的日期，例如</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">LocalDate</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2000</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">NOVEMBER</span><span class="tok-o">,</span> <span class="tok-mi">20</span><span class="tok-o">);</span>
+<span class="tok-n">LocalDate</span> <span class="tok-n">nextWed</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">next</span><span class="tok-o">(</span><span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">WEDNESDAY</span><span class="tok-o">));</span>
+
+<span class="tok-n">LocalDate</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2000</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">NOVEMBER</span><span class="tok-o">,</span> <span class="tok-mi">20</span><span class="tok-o">);</span>
+<span class="tok-n">TemporalAdjuster</span> <span class="tok-n">adj</span> <span class="tok-o">=</span> <span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">next</span><span class="tok-o">(</span><span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">WEDNESDAY</span><span class="tok-o">);</span>
+<span class="tok-n">LocalDate</span> <span class="tok-n">nextWed</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">adj</span><span class="tok-o">);</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;For the date of %s, the next Wednesday is %s.%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">,</span> <span class="tok-n">nextWed</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>For the date of 2000-11-20, the next Wednesday is 2000-11-22.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>=== YearMonth</p>
+</div>
+<div class="paragraph">
+<p>表示指定年的月份。</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">YearMonth</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">YearMonth</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s: %d%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date</span><span class="tok-o">,</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">lengthOfMonth</span><span class="tok-o">());</span>
+
+<span class="tok-n">YearMonth</span> <span class="tok-n">date2</span> <span class="tok-o">=</span> <span class="tok-n">YearMonth</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2010</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">FEBRUARY</span><span class="tok-o">);</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s: %d%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date2</span><span class="tok-o">,</span> <span class="tok-n">date2</span><span class="tok-o">.</span><span class="tok-na">lengthOfMonth</span><span class="tok-o">());</span>
+
+<span class="tok-n">YearMonth</span> <span class="tok-n">date3</span> <span class="tok-o">=</span> <span class="tok-n">YearMonth</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2012</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">FEBRUARY</span><span class="tok-o">);</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s: %d%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date3</span><span class="tok-o">,</span> <span class="tok-n">date3</span><span class="tok-o">.</span><span class="tok-na">lengthOfMonth</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>2013-06: 30
+2010-02: 28
+2012-02: 29</p>
+</div>
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="monthday">MonthDay</h4>
+<div class="paragraph">
+<p>表示指定月份的日期，例如</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">MonthDay</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">MonthDay</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">FEBRUARY</span><span class="tok-o">,</span> <span class="tok-mi">29</span><span class="tok-o">);</span>
+<span class="tok-kt">boolean</span> <span class="tok-n">validLeapYear</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">isValidYear</span><span class="tok-o">(</span><span class="tok-mi">2010</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>=== Year</p>
+</div>
+<div class="paragraph">
+<p>顾名思义，表示年份。</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kt">boolean</span> <span class="tok-n">validLeapYear</span> <span class="tok-o">=</span> <span class="tok-n">Year</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2012</span><span class="tok-o">).</span><span class="tok-na">isLeap</span><span class="tok-o">();</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="date-and-time-classes">Date and Time classes</h3>
+<div class="sect3">
+<h4 id="localtime">LocalTime</h4>
+<div class="paragraph">
+<p>类似其他以<code>Local</code>开头的类，但只处理时间，例如电影时间、店铺开门关门时间，也可以用来创建数字时钟，例如</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">LocalTime</span> <span class="tok-n">thisSec</span><span class="tok-o">;</span>
+
+<span class="tok-k">for</span> <span class="tok-o">(;;)</span> <span class="tok-o">{</span>
+    <span class="tok-n">thisSec</span> <span class="tok-o">=</span> <span class="tok-n">LocalTime</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span>
+
+    <span class="tok-c1">// implementation of display code is left to the reader</span>
+    <span class="tok-n">display</span><span class="tok-o">(</span><span class="tok-n">thisSec</span><span class="tok-o">.</span><span class="tok-na">getHour</span><span class="tok-o">(),</span> <span class="tok-n">thisSec</span><span class="tok-o">.</span><span class="tok-na">getMinute</span><span class="tok-o">(),</span> <span class="tok-n">thisSec</span><span class="tok-o">.</span><span class="tok-na">getSecond</span><span class="tok-o">());</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>它和时区无关</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>=== LocalDateTime</p>
+</div>
+<div class="paragraph">
+<p>LocalDate和LocalTime的结合，既处理Date，也处理Time，但是不包括时区。如果要考虑时区，需要用<code>ZonedDateTime</code>或<code>OffsetDateTime</code>。</p>
+</div>
+<div class="paragraph">
+<p>除了<code>now()</code>方法之外，它提供了众多的<code>of()</code>方法用来调整时间。<code>from()</code>用来将其他的temporal format转化为<code>LocalDateTime</code>。例如</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;now: %s%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">());</span>
+
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;Apr 15, 1994 @ 11:30am: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">1994</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">APRIL</span><span class="tok-o">,</span> <span class="tok-mi">15</span><span class="tok-o">,</span> <span class="tok-mi">11</span><span class="tok-o">,</span> <span class="tok-mi">30</span><span class="tok-o">));</span>
+
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;now (from Instant): %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">(),</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">systemDefault</span><span class="tok-o">()));</span>
+
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;6 months from now: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">plusMonths</span><span class="tok-o">(</span><span class="tok-mi">6</span><span class="tok-o">));</span>
+
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;6 months ago: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">minusMonths</span><span class="tok-o">(</span><span class="tok-mi">6</span><span class="tok-o">));</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>now: 2013-07-24T17:13:59.985
+Apr 15, 1994 @ 11:30am: 1994-04-15T11:30
+now (from Instant): 2013-07-24T17:14:00.479
+6 months from now: 2014-01-24T17:14:00.480
+6 months ago: 2013-01-24T17:14:00.481</p>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="time-zone-and-offset-classes">Time Zone and Offset Classes</h3>
+<div class="paragraph">
+<p>Date-Time API 提供了两个类用来设定时区或者offset</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ZoneId</code>指定了一个时区标识，提供了<code>Instant</code>和<code>LocalDateTime</code>之间互相转化的规则</p>
+</li>
+<li>
+<p><code>ZoneOffset</code>指定了一个和格林尼治/UTC之间的时区差</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>这是一个打印出所有时区的示例</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Set</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">allZones</span> <span class="tok-o">=</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">getAvailableZoneIds</span><span class="tok-o">();</span>
+<span class="tok-n">LocalDateTime</span> <span class="tok-n">dt</span> <span class="tok-o">=</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span>
+
+<span class="tok-c1">// Create a List using the set of zones and sort it.</span>
+<span class="tok-n">List</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;</span> <span class="tok-n">zoneList</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-n">ArrayList</span><span class="tok-o">&lt;</span><span class="tok-n">String</span><span class="tok-o">&gt;(</span><span class="tok-n">allZones</span><span class="tok-o">);</span>
+<span class="tok-n">Collections</span><span class="tok-o">.</span><span class="tok-na">sort</span><span class="tok-o">(</span><span class="tok-n">zoneList</span><span class="tok-o">);</span>
+
+<span class="tok-o">...</span>
+
+<span class="tok-k">for</span> <span class="tok-o">(</span><span class="tok-n">String</span> <span class="tok-n">s</span> <span class="tok-o">:</span> <span class="tok-n">zoneList</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">ZoneId</span> <span class="tok-n">zone</span> <span class="tok-o">=</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">s</span><span class="tok-o">);</span>
+    <span class="tok-n">ZonedDateTime</span> <span class="tok-n">zdt</span> <span class="tok-o">=</span> <span class="tok-n">dt</span><span class="tok-o">.</span><span class="tok-na">atZone</span><span class="tok-o">(</span><span class="tok-n">zone</span><span class="tok-o">);</span>
+    <span class="tok-n">ZoneOffset</span> <span class="tok-n">offset</span> <span class="tok-o">=</span> <span class="tok-n">zdt</span><span class="tok-o">.</span><span class="tok-na">getOffset</span><span class="tok-o">();</span>
+    <span class="tok-kt">int</span> <span class="tok-n">secondsOfHour</span> <span class="tok-o">=</span> <span class="tok-n">offset</span><span class="tok-o">.</span><span class="tok-na">getTotalSeconds</span><span class="tok-o">()</span> <span class="tok-o">%</span> <span class="tok-o">(</span><span class="tok-mi">60</span> <span class="tok-o">*</span> <span class="tok-mi">60</span><span class="tok-o">);</span>
+    <span class="tok-n">String</span> <span class="tok-n">out</span> <span class="tok-o">=</span> <span class="tok-n">String</span><span class="tok-o">.</span><span class="tok-na">format</span><span class="tok-o">(</span><span class="tok-s">&quot;%35s %10s%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">zone</span><span class="tok-o">,</span> <span class="tok-n">offset</span><span class="tok-o">);</span>
+
+    <span class="tok-c1">// Write only time zones that do not have a whole hour offset</span>
+    <span class="tok-c1">// to standard out.</span>
+    <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">secondsOfHour</span> <span class="tok-o">!=</span> <span class="tok-mi">0</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+        <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-n">out</span><span class="tok-o">);</span>
+    <span class="tok-o">}</span>
+    <span class="tok-o">...</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>America/Caracas     -04:30
+     America/St_Johns     -02:30
+        Asia/Calcutta     +05:30
+         Asia/Colombo     +05:30
+           Asia/Kabul     +04:30
+       Asia/Kathmandu     +05:45
+        Asia/Katmandu     +05:45
+         Asia/Kolkata     +05:30
+         Asia/Rangoon     +06:30
+          Asia/Tehran     +04:30
+   Australia/Adelaide     +09:30
+Australia/Broken_Hill     +09:30
+     Australia/Darwin     +09:30
+      Australia/Eucla     +08:45
+        Australia/LHI     +10:30
+  Australia/Lord_Howe     +10:30
+      Australia/North     +09:30
+      Australia/South     +09:30
+ Australia/Yancowinna     +09:30
+  Canada/Newfoundland     -02:30
+         Indian/Cocos     +06:30
+                 Iran     +04:30
+              NZ-CHAT     +12:45
+      Pacific/Chatham     +12:45
+    Pacific/Marquesas     -09:30
+      Pacific/Norfolk     +11:30</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>=== Date-Time API classes</p>
+</div>
+<div class="paragraph">
+<p>提供了3个temporal-based classed,是基于时区的</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ZonedDateTime</code>: handles a date and time with a corresponding time zone with a time zone offset from Greenwich/UTC</p>
+</li>
+<li>
+<p><code>OffsetDateTime</code>:handles a date and time with a corresponding time zone offset from Greenwich/UTC, without a time zone ID</p>
+</li>
+<li>
+<p><code>OffsetTime</code>: handles time with a corresponding time zone offset from Greenwich/UTC, without a time zone ID</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>其中只有<code>ZonedDateTime</code>使用<code>ZonedRules</code>,可以决定一个特定时区的偏移量</p>
+</div>
+<div class="paragraph">
+<p>=== ZonedDateTime</p>
+</div>
+<div class="paragraph">
+<p>其实是<code>LocalDateTime</code>和<code>ZoneId</code>的组合。用来表示完整的日期和时间以及时区。示例</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">DateTimeFormatter</span> <span class="tok-n">format</span> <span class="tok-o">=</span> <span class="tok-n">DateTimeFormatter</span><span class="tok-o">.</span><span class="tok-na">ofPattern</span><span class="tok-o">(</span><span class="tok-s">&quot;MMM d yyyy  hh:mm a&quot;</span><span class="tok-o">);</span>
+
+<span class="tok-c1">// Leaving from San Francisco on July 20, 2013, at 7:30 p.m.</span>
+<span class="tok-n">LocalDateTime</span> <span class="tok-n">leaving</span> <span class="tok-o">=</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2013</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">JULY</span><span class="tok-o">,</span> <span class="tok-mi">20</span><span class="tok-o">,</span> <span class="tok-mi">19</span><span class="tok-o">,</span> <span class="tok-mi">30</span><span class="tok-o">);</span>
+<span class="tok-n">ZoneId</span> <span class="tok-n">leavingZone</span> <span class="tok-o">=</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;America/Los_Angeles&quot;</span><span class="tok-o">);</span>
+<span class="tok-n">ZonedDateTime</span> <span class="tok-n">departure</span> <span class="tok-o">=</span> <span class="tok-n">ZonedDateTime</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">leaving</span><span class="tok-o">,</span> <span class="tok-n">leavingZone</span><span class="tok-o">);</span>
+
+<span class="tok-k">try</span> <span class="tok-o">{</span>
+    <span class="tok-n">String</span> <span class="tok-n">out1</span> <span class="tok-o">=</span> <span class="tok-n">departure</span><span class="tok-o">.</span><span class="tok-na">format</span><span class="tok-o">(</span><span class="tok-n">format</span><span class="tok-o">);</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;LEAVING:  %s (%s)%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">out1</span><span class="tok-o">,</span> <span class="tok-n">leavingZone</span><span class="tok-o">);</span>
+<span class="tok-o">}</span> <span class="tok-k">catch</span> <span class="tok-o">(</span><span class="tok-n">DateTimeException</span> <span class="tok-n">exc</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s can&#39;t be formatted!%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">departure</span><span class="tok-o">);</span>
+    <span class="tok-k">throw</span> <span class="tok-n">exc</span><span class="tok-o">;</span>
+<span class="tok-o">}</span>
+
+<span class="tok-c1">// Flight is 10 hours and 50 minutes, or 650 minutes</span>
+<span class="tok-n">ZoneId</span> <span class="tok-n">arrivingZone</span> <span class="tok-o">=</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;Asia/Tokyo&quot;</span><span class="tok-o">);</span>
+<span class="tok-n">ZonedDateTime</span> <span class="tok-n">arrival</span> <span class="tok-o">=</span> <span class="tok-n">departure</span><span class="tok-o">.</span><span class="tok-na">withZoneSameInstant</span><span class="tok-o">(</span><span class="tok-n">arrivingZone</span><span class="tok-o">)</span>
+                                 <span class="tok-o">.</span><span class="tok-na">plusMinutes</span><span class="tok-o">(</span><span class="tok-mi">650</span><span class="tok-o">);</span>
+
+<span class="tok-k">try</span> <span class="tok-o">{</span>
+    <span class="tok-n">String</span> <span class="tok-n">out2</span> <span class="tok-o">=</span> <span class="tok-n">arrival</span><span class="tok-o">.</span><span class="tok-na">format</span><span class="tok-o">(</span><span class="tok-n">format</span><span class="tok-o">);</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;ARRIVING: %s (%s)%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">out2</span><span class="tok-o">,</span> <span class="tok-n">arrivingZone</span><span class="tok-o">);</span>
+<span class="tok-o">}</span> <span class="tok-k">catch</span> <span class="tok-o">(</span><span class="tok-n">DateTimeException</span> <span class="tok-n">exc</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s can&#39;t be formatted!%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">arrival</span><span class="tok-o">);</span>
+    <span class="tok-k">throw</span> <span class="tok-n">exc</span><span class="tok-o">;</span>
+<span class="tok-o">}</span>
+
+<span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">arrivingZone</span><span class="tok-o">.</span><span class="tok-na">getRules</span><span class="tok-o">().</span><span class="tok-na">isDaylightSavings</span><span class="tok-o">(</span><span class="tok-n">arrival</span><span class="tok-o">.</span><span class="tok-na">toInstant</span><span class="tok-o">()))</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;  (%s daylight saving time will be in effect.)%n&quot;</span><span class="tok-o">,</span>
+                      <span class="tok-n">arrivingZone</span><span class="tok-o">);</span>
+<span class="tok-k">else</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;  (%s standard time will be in effect.)%n&quot;</span><span class="tok-o">,</span>
+                      <span class="tok-n">arrivingZone</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>LEAVING:  Jul 20 2013  07:30 PM (America/Los_Angeles)
+ARRIVING: Jul 21 2013  10:20 PM (Asia/Tokyo)
+  (Asia/Tokyo standard time will be in effect.)</p>
+</div>
+</blockquote>
+</div>
+<div class="sect3">
+<h4 id="offsetdatetime">OffsetDateTime</h4>
+<div class="paragraph">
+<p>其实是<code>LocalDateTime</code>和<code>ZoneOffset</code>的组合，表示完整的日期时间以及与UTC时间之间的时区偏移量，例如</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-c1">// Find the last Thursday in July 2013.</span>
+<span class="tok-n">LocalDateTime</span> <span class="tok-n">localDate</span> <span class="tok-o">=</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2013</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">JULY</span><span class="tok-o">,</span> <span class="tok-mi">20</span><span class="tok-o">,</span> <span class="tok-mi">19</span><span class="tok-o">,</span> <span class="tok-mi">30</span><span class="tok-o">);</span>
+<span class="tok-n">ZoneOffset</span> <span class="tok-n">offset</span> <span class="tok-o">=</span> <span class="tok-n">ZoneOffset</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-s">&quot;-08:00&quot;</span><span class="tok-o">);</span>
+
+<span class="tok-n">OffsetDateTime</span> <span class="tok-n">offsetDate</span> <span class="tok-o">=</span> <span class="tok-n">OffsetDateTime</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">localDate</span><span class="tok-o">,</span> <span class="tok-n">offset</span><span class="tok-o">);</span>
+<span class="tok-n">OffsetDateTime</span> <span class="tok-n">lastThursday</span> <span class="tok-o">=</span>
+        <span class="tok-n">offsetDate</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">lastInMonth</span><span class="tok-o">(</span><span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">THURSDAY</span><span class="tok-o">));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;The last Thursday in July 2013 is the %sth.%n&quot;</span><span class="tok-o">,</span>
+                   <span class="tok-n">lastThursday</span><span class="tok-o">.</span><span class="tok-na">getDayOfMonth</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>The last Thursday in July 2013 is the 25th.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>=== OffsetTime</p>
+</div>
+<div class="paragraph">
+<p>其实是<code>LocalTime</code>和<code>ZoneOffset</code>的组合，表示时间以及与UTC时间之间的时区偏移量</p>
+</div>
+<div class="paragraph">
+<p>== Instant Classes</p>
+</div>
+<div class="paragraph">
+<p>Date-Time API的一个核心类就是<code>Instant</code>，表示时间线上的起始纳秒。它用来生成时间戳表示机器时间。例如</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kn">import</span> <span class="tok-nn">java.time.Instant</span><span class="tok-o">;</span>
+
+<span class="tok-n">Instant</span> <span class="tok-n">timestamp</span> <span class="tok-o">=</span> <span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>它返回的是和称为EPOCH的时间(1970-01-01T00:00:00Z)之间的时间差。在epoch之前的时间返回负数。</p>
+</div>
+<div class="paragraph">
+<p><code>Instant</code>提供了许多操作时间的方法。</p>
+</div>
+<div class="paragraph">
+<p>它无法处理人类的时间单元，诸如年月日等，必须通过绑定时区，转化为诸如<code>LocalDate</code>，<code>LocalTime</code>之类才可以。例如</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Instant</span> <span class="tok-n">timestamp</span><span class="tok-o">;</span>
+<span class="tok-o">...</span>
+<span class="tok-n">LocalDateTime</span> <span class="tok-n">ldt</span> <span class="tok-o">=</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">timestamp</span><span class="tok-o">,</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">systemDefault</span><span class="tok-o">());</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s %d %d at %d:%d%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">ldt</span><span class="tok-o">.</span><span class="tok-na">getMonth</span><span class="tok-o">(),</span> <span class="tok-n">ldt</span><span class="tok-o">.</span><span class="tok-na">getDayOfMonth</span><span class="tok-o">(),</span>
+                  <span class="tok-n">ldt</span><span class="tok-o">.</span><span class="tok-na">getYear</span><span class="tok-o">(),</span> <span class="tok-n">ldt</span><span class="tok-o">.</span><span class="tok-na">getHour</span><span class="tok-o">(),</span> <span class="tok-n">ldt</span><span class="tok-o">.</span><span class="tok-na">getMinute</span><span class="tok-o">());</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>== Parsing and Formatting</p>
+</div>
+<div class="paragraph">
+<p>通过提供<code>DateTimeFormatter</code>的pattern，temporal-based classes可以调用parse或者format将字符串转换为类或者进行展示。</p>
+</div>
+<div class="paragraph">
+<p><code>DateTimeFormatter</code>提供了若干预定义的formatters,也可以自定义。
+parse或者format会分别抛出<code>DateTimeParseException</code>和<code>DateTimeException</code>异常。</p>
+</div>
+<div class="paragraph">
+<p>=== Parsing</p>
+</div>
+<div class="paragraph">
+<p>LocalDate使用一个参数的方法<code>parse(CharSequence)</code>使用<code>ISO_LOCAL_DATE</code> formatter。如果要使用其他的formatter，需要使用两个参数的<code>parse(CharSequence, DateTimeFormatter)</code>方法。例如<code>LocalDate date = LocalDate.parse(str, DateTimeFormatter.BASIC_ISO_DATE);</code>，当然，也可以使用自定义的formatter，例如</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">String</span> <span class="tok-n">input</span> <span class="tok-o">=</span> <span class="tok-o">...;</span>
+<span class="tok-k">try</span> <span class="tok-o">{</span>
+    <span class="tok-n">DateTimeFormatter</span> <span class="tok-n">formatter</span> <span class="tok-o">=</span>
+                      <span class="tok-n">DateTimeFormatter</span><span class="tok-o">.</span><span class="tok-na">ofPattern</span><span class="tok-o">(</span><span class="tok-s">&quot;MMM d yyyy&quot;</span><span class="tok-o">);</span>
+    <span class="tok-n">LocalDate</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">parse</span><span class="tok-o">(</span><span class="tok-n">input</span><span class="tok-o">,</span> <span class="tok-n">formatter</span><span class="tok-o">);</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date</span><span class="tok-o">);</span>
+<span class="tok-o">}</span>
+<span class="tok-k">catch</span> <span class="tok-o">(</span><span class="tok-n">DateTimeParseException</span> <span class="tok-n">exc</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s is not parsable!%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">input</span><span class="tok-o">);</span>
+    <span class="tok-k">throw</span> <span class="tok-n">exc</span><span class="tok-o">;</span>      <span class="tok-c1">// Rethrow the exception.</span>
+<span class="tok-o">}</span>
+<span class="tok-c1">// &#39;date&#39; has been successfully parsed</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>关于<code>DateTimeFormatter</code>的更多信息请参考[full list of symbols](<a href="https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns" class="bare">https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns</a>)</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="formatting">Formatting</h4>
+<div class="paragraph">
+<p>方法<code>format(DateTimeFormatter)</code>将一个temporal-based类转化为string。例如</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">ZoneId</span> <span class="tok-n">leavingZone</span> <span class="tok-o">=</span> <span class="tok-o">...;</span>
+<span class="tok-n">ZonedDateTime</span> <span class="tok-n">departure</span> <span class="tok-o">=</span> <span class="tok-o">...;</span>
+
+<span class="tok-k">try</span> <span class="tok-o">{</span>
+    <span class="tok-n">DateTimeFormatter</span> <span class="tok-n">format</span> <span class="tok-o">=</span> <span class="tok-n">DateTimeFormatter</span><span class="tok-o">.</span><span class="tok-na">ofPattern</span><span class="tok-o">(</span><span class="tok-s">&quot;MMM d yyyy  hh:mm a&quot;</span><span class="tok-o">);</span>
+    <span class="tok-n">String</span> <span class="tok-n">out</span> <span class="tok-o">=</span> <span class="tok-n">departure</span><span class="tok-o">.</span><span class="tok-na">format</span><span class="tok-o">(</span><span class="tok-n">format</span><span class="tok-o">);</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;LEAVING:  %s (%s)%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">out</span><span class="tok-o">,</span> <span class="tok-n">leavingZone</span><span class="tok-o">);</span>
+<span class="tok-o">}</span>
+<span class="tok-k">catch</span> <span class="tok-o">(</span><span class="tok-n">DateTimeException</span> <span class="tok-n">exc</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s can&#39;t be formatted!%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">departure</span><span class="tok-o">);</span>
+    <span class="tok-k">throw</span> <span class="tok-n">exc</span><span class="tok-o">;</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>== Temporal Package</p>
+</div>
+<div class="paragraph">
+<p>包<code>java.time.temporal </code>提供了众多接口、类和枚举用来支撑date和time，特别是一些计算方法。</p>
+</div>
+<div class="paragraph">
+<p>这些接口被用于最低的级别，也就是声明的常量要使用具体类，而不是接口，好比我们会声明String类而不是CharSequence一样。</p>
+</div>
+<div class="paragraph">
+<p>=== Temporal and TemporalAccessor</p>
+</div>
+<div class="paragraph">
+<p>接口<code>Temporal</code>提供了计算temporal-based类的计算框架，并且由类进行了实现，比如Instant,LocalDateTime等。而<code>TemporalAccessor</code>接口提供了Temporal接口的只读版本。</p>
+</div>
+<div class="paragraph">
+<p>Temporal和TemporalAccessor接口用<code>TemporalField</code>类型定义了众多的fields。<code>ChronoField</code>是其中一个实现类，提供了丰富的定义好了的常量集。这些fields的单位都由<code>TemporalUnit</code>接口指定。同样的，<code>ChronoUnit</code>是其实现之一。</p>
+</div>
+<div class="paragraph">
+<p>Temporal接口的计算日期时间的方法参数必须是<code>TemporalAmount</code>类型，类<code>Period</code>和<code>Duration</code>是其中两个实现。</p>
+</div>
+<div class="paragraph">
+<p>=== ChronoField and IsoFields</p>
+</div>
+<div class="paragraph">
+<p><code>ChronoField</code>实现了<code>TemporalField</code>，提供了众多常量用来读取日期和时间。</p>
+</div>
+<div class="paragraph">
+<p>另外还有<code>IsoFields</code>，<code>WeekFields</code>和<code>JulianFields</code>。</p>
+</div>
+<div class="paragraph">
+<p>=== ChronoUnit</p>
+</div>
+<div class="paragraph">
+<p><code>ChronoUnit</code>实现了<code>TemporalUnit</code>接口，提供了基于日期和时间的标准单位。但并非所有的类都支持所有的ChronoUnit。<code>TemporalAccessor.isSupported(TemporalUnit)</code>可用来验证是否支持。</p>
+</div>
+<div class="paragraph">
+<p>== Temporal Adjuster</p>
+</div>
+<div class="paragraph">
+<p>位于<code>java.time.temporal</code>包中，提供方法接收*Temporal*，返回调整后的值。</p>
+</div>
+<div class="paragraph">
+<p>=== Predefined Adjusters</p>
+</div>
+<div class="paragraph">
+<p>The <code>TemporalAdjusters</code> class提供了一组设定好了的方法用来进行调整，这些都是静态工具方法。看示例</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">LocalDate</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2000</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">OCTOBER</span><span class="tok-o">,</span> <span class="tok-mi">15</span><span class="tok-o">);</span>
+<span class="tok-n">DayOfWeek</span> <span class="tok-n">dotw</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">getDayOfWeek</span><span class="tok-o">();</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s is on a %s%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date</span><span class="tok-o">,</span> <span class="tok-n">dotw</span><span class="tok-o">);</span>
+
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;first day of Month: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">firstDayOfMonth</span><span class="tok-o">()));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;first Monday of Month: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">firstInMonth</span><span class="tok-o">(</span><span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">MONDAY</span><span class="tok-o">)));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;last day of Month: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">lastDayOfMonth</span><span class="tok-o">()));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;first day of next Month: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">firstDayOfNextMonth</span><span class="tok-o">()));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;first day of next Year: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">firstDayOfNextYear</span><span class="tok-o">()));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;first day of Year: %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">firstDayOfYear</span><span class="tok-o">()));</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>2000-10-15 is on a SUNDAY
+first day of Month: 2000-10-01
+first Monday of Month: 2000-10-02
+last day of Month: 2000-10-31
+first day of next Month: 2000-11-01
+first day of next Year: 2001-01-01
+first day of Year: 2000-01-01</p>
+</div>
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="custom-adjusters">Custom Adjusters</h4>
+<div class="paragraph">
+<p>如果需要自定义adjuster的话，需要实现*TemporalAdjuster*接口，下面是一个示例</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kd">public</span> <span class="tok-n">Temporal</span> <span class="tok-nf">adjustInto</span><span class="tok-o">(</span><span class="tok-n">Temporal</span> <span class="tok-n">input</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">LocalDate</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">from</span><span class="tok-o">(</span><span class="tok-n">input</span><span class="tok-o">);</span>
+    <span class="tok-kt">int</span> <span class="tok-n">day</span><span class="tok-o">;</span>
+    <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">getDayOfMonth</span><span class="tok-o">()</span> <span class="tok-o">&lt;</span> <span class="tok-mi">15</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+        <span class="tok-n">day</span> <span class="tok-o">=</span> <span class="tok-mi">15</span><span class="tok-o">;</span>
+    <span class="tok-o">}</span> <span class="tok-k">else</span> <span class="tok-o">{</span>
+        <span class="tok-n">day</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">lastDayOfMonth</span><span class="tok-o">()).</span><span class="tok-na">getDayOfMonth</span><span class="tok-o">();</span>
+    <span class="tok-o">}</span>
+    <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">withDayOfMonth</span><span class="tok-o">(</span><span class="tok-n">day</span><span class="tok-o">);</span>
+    <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">getDayOfWeek</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">SATURDAY</span> <span class="tok-o">||</span>
+        <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">getDayOfWeek</span><span class="tok-o">()</span> <span class="tok-o">==</span> <span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">SUNDAY</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+        <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">TemporalAdjusters</span><span class="tok-o">.</span><span class="tok-na">previous</span><span class="tok-o">(</span><span class="tok-n">DayOfWeek</span><span class="tok-o">.</span><span class="tok-na">FRIDAY</span><span class="tok-o">));</span>
+    <span class="tok-o">}</span>
+
+    <span class="tok-k">return</span> <span class="tok-n">input</span><span class="tok-o">.</span><span class="tok-na">with</span><span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">);</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>调用</p>
+</div>
+<div class="paragraph">
+<p><code>LocalDate nextPayday = date.with(new PaydayAdjuster());</code></p>
+</div>
+<div class="paragraph">
+<p>输出</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Given the date:  2013 Jun 3
+the next payday: 2013 Jun 14</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Given the date:  2013 Jun 18
+the next payday: 2013 Jun 28</p>
+</div>
+<div class="paragraph">
+<p>== Temporal Query</p>
+</div>
+<div class="paragraph">
+<p>用来从一个temporal-based 对象中间检索信息</p>
+</div>
+<div class="paragraph">
+<p>=== Predefined Queries</p>
+</div>
+<div class="paragraph">
+<p>The <code>TemporalQueries</code> class提供了一组现成的工具方法。示例</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">TemporalQueries</span> <span class="tok-n">query</span> <span class="tok-o">=</span> <span class="tok-n">TemporalQueries</span><span class="tok-o">.</span><span class="tok-na">precision</span><span class="tok-o">();</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;LocalDate precision is %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-n">query</span><span class="tok-o">));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;LocalDateTime precision is %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-n">query</span><span class="tok-o">));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;Year precision is %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">Year</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-n">query</span><span class="tok-o">));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;YearMonth precision is %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">YearMonth</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-n">query</span><span class="tok-o">));</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;Instant precision is %s%n&quot;</span><span class="tok-o">,</span>
+                  <span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">().</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-n">query</span><span class="tok-o">));</span></code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>LocalDate precision is Days
+LocalDateTime precision is Nanos
+Year precision is Years
+YearMonth precision is Months
+Instant precision is Nanos</p>
+</div>
+</blockquote>
+</div>
+</div>
+<div class="sect3">
+<h4 id="custom-queries">Custom Queries</h4>
+<div class="paragraph">
+<p>自定义的query需要实现<code>TemporalQuery</code>接口或者使用lambda expression。示例</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-c1">// Returns true if the passed-in date occurs during one of the</span>
+<span class="tok-c1">// family vacations. Because the query compares the month and day only,</span>
+<span class="tok-c1">// the check succeeds even if the Temporal types are not the same.</span>
+<span class="tok-kd">public</span> <span class="tok-n">Boolean</span> <span class="tok-nf">queryFrom</span><span class="tok-o">(</span><span class="tok-n">TemporalAccessor</span> <span class="tok-n">date</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-kt">int</span> <span class="tok-n">month</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">get</span><span class="tok-o">(</span><span class="tok-n">ChronoField</span><span class="tok-o">.</span><span class="tok-na">MONTH_OF_YEAR</span><span class="tok-o">);</span>
+    <span class="tok-kt">int</span> <span class="tok-n">day</span>   <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">get</span><span class="tok-o">(</span><span class="tok-n">ChronoField</span><span class="tok-o">.</span><span class="tok-na">DAY_OF_MONTH</span><span class="tok-o">);</span>
+
+    <span class="tok-c1">// Disneyland over Spring Break</span>
+    <span class="tok-k">if</span> <span class="tok-o">((</span><span class="tok-n">month</span> <span class="tok-o">==</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">APRIL</span><span class="tok-o">.</span><span class="tok-na">getValue</span><span class="tok-o">())</span> <span class="tok-o">&amp;&amp;</span> <span class="tok-o">((</span><span class="tok-n">day</span> <span class="tok-o">&gt;=</span> <span class="tok-mi">3</span><span class="tok-o">)</span> <span class="tok-o">&amp;&amp;</span> <span class="tok-o">(</span><span class="tok-n">day</span> <span class="tok-o">&lt;=</span> <span class="tok-mi">8</span><span class="tok-o">)))</span>
+        <span class="tok-k">return</span> <span class="tok-n">Boolean</span><span class="tok-o">.</span><span class="tok-na">TRUE</span><span class="tok-o">;</span>
+
+    <span class="tok-c1">// Smith family reunion on Lake Saugatuck</span>
+    <span class="tok-k">if</span> <span class="tok-o">((</span><span class="tok-n">month</span> <span class="tok-o">==</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">AUGUST</span><span class="tok-o">.</span><span class="tok-na">getValue</span><span class="tok-o">())</span> <span class="tok-o">&amp;&amp;</span> <span class="tok-o">((</span><span class="tok-n">day</span> <span class="tok-o">&gt;=</span> <span class="tok-mi">8</span><span class="tok-o">)</span> <span class="tok-o">&amp;&amp;</span> <span class="tok-o">(</span><span class="tok-n">day</span> <span class="tok-o">&lt;=</span> <span class="tok-mi">14</span><span class="tok-o">)))</span>
+        <span class="tok-k">return</span> <span class="tok-n">Boolean</span><span class="tok-o">.</span><span class="tok-na">TRUE</span><span class="tok-o">;</span>
+
+    <span class="tok-k">return</span> <span class="tok-n">Boolean</span><span class="tok-o">.</span><span class="tok-na">FALSE</span><span class="tok-o">;</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>或者</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-c1">// Invoking the query without using a lambda expression.</span>
+<span class="tok-n">Boolean</span> <span class="tok-n">isFamilyVacation</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-k">new</span> <span class="tok-n">FamilyVacations</span><span class="tok-o">());</span>
+
+<span class="tok-c1">// Invoking the query using a lambda expression.</span>
+<span class="tok-n">Boolean</span> <span class="tok-n">isFamilyBirthday</span> <span class="tok-o">=</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-na">query</span><span class="tok-o">(</span><span class="tok-n">FamilyBirthdays</span><span class="tok-o">::</span><span class="tok-n">isFamilyBirthday</span><span class="tok-o">);</span>
+
+<span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">isFamilyVacation</span><span class="tok-o">.</span><span class="tok-na">booleanValue</span><span class="tok-o">()</span> <span class="tok-o">||</span> <span class="tok-n">isFamilyBirthday</span><span class="tok-o">.</span><span class="tok-na">booleanValue</span><span class="tok-o">())</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s is an important date!%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date</span><span class="tok-o">);</span>
+<span class="tok-k">else</span>
+    <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">printf</span><span class="tok-o">(</span><span class="tok-s">&quot;%s is not an important date.%n&quot;</span><span class="tok-o">,</span> <span class="tok-n">date</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="period-and-duration">Period and Duration</h3>
+<div class="paragraph">
+<p>当需要用到时间的数量的时候，类<code>Duration</code>, <code>Period</code>, 或<code>ChronoUnit.between</code>方法可供使用。</p>
+</div>
+<div class="paragraph">
+<p>*Duration*使用time-based值衡量时间数量，如秒，纳秒等，而*Period*使用date-based值衡量时间数量，如年月等。</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>一天的*Duration*是精确的24小时，而一天的*Period*根据时区会有所不同</p>
+</div>
+</blockquote>
+</div>
+<div class="sect3">
+<h4 id="duration">Duration</h4>
+<div class="paragraph">
+<p>*Duration*适合用来测量机器时间，例如使用<strong>Instant</strong>的对象。*Duration*可以存在负值。示例</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Instant</span> <span class="tok-n">t1</span><span class="tok-o">,</span> <span class="tok-n">t2</span><span class="tok-o">;</span>
+<span class="tok-o">...</span>
+<span class="tok-kt">long</span> <span class="tok-n">ns</span> <span class="tok-o">=</span> <span class="tok-n">Duration</span><span class="tok-o">.</span><span class="tok-na">between</span><span class="tok-o">(</span><span class="tok-n">t1</span><span class="tok-o">,</span> <span class="tok-n">t2</span><span class="tok-o">).</span><span class="tok-na">toNanos</span><span class="tok-o">();</span>
+
+<span class="tok-n">Instant</span> <span class="tok-n">start</span><span class="tok-o">;</span>
+<span class="tok-o">...</span>
+<span class="tok-n">Duration</span> <span class="tok-n">gap</span> <span class="tok-o">=</span> <span class="tok-n">Duration</span><span class="tok-o">.</span><span class="tok-na">ofSeconds</span><span class="tok-o">(</span><span class="tok-mi">10</span><span class="tok-o">);</span>
+<span class="tok-n">Instant</span> <span class="tok-n">later</span> <span class="tok-o">=</span> <span class="tok-n">start</span><span class="tok-o">.</span><span class="tok-na">plus</span><span class="tok-o">(</span><span class="tok-n">gap</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Duration</strong> 和timeline没有关系。</p>
+</div>
+<div class="paragraph">
+<p>=== ChronoUnit</p>
+</div>
+<div class="paragraph">
+<p>这个枚举类前面讨论过，它的<code>between</code>方法应用于所有temporal-based对象。例如</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kn">import</span> <span class="tok-nn">java.time.Instant</span><span class="tok-o">;</span>
+<span class="tok-kn">import</span> <span class="tok-nn">java.time.temporal.Temporal</span><span class="tok-o">;</span>
+<span class="tok-kn">import</span> <span class="tok-nn">java.time.temporal.ChronoUnit</span><span class="tok-o">;</span>
+
+<span class="tok-n">Instant</span> <span class="tok-n">previous</span><span class="tok-o">,</span> <span class="tok-n">current</span><span class="tok-o">,</span> <span class="tok-n">gap</span><span class="tok-o">;</span>
+<span class="tok-o">...</span>
+<span class="tok-n">current</span> <span class="tok-o">=</span> <span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span>
+<span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">previous</span> <span class="tok-o">!=</span> <span class="tok-kc">null</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-n">gap</span> <span class="tok-o">=</span> <span class="tok-n">ChronoUnit</span><span class="tok-o">.</span><span class="tok-na">MILLIS</span><span class="tok-o">.</span><span class="tok-na">between</span><span class="tok-o">(</span><span class="tok-n">previous</span><span class="tok-o">,</span><span class="tok-n">current</span><span class="tok-o">);</span>
+<span class="tok-o">}</span>
+<span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="period">Period</h4>
+<div class="paragraph">
+<p>date-based 时间数量使用period，它提供了大量的get方法，诸如<code>getMonths</code>，<code>getDays</code>等。
+代码示例</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">LocalDate</span> <span class="tok-n">today</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span>
+<span class="tok-n">LocalDate</span> <span class="tok-n">birthday</span> <span class="tok-o">=</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">1960</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">JANUARY</span><span class="tok-o">,</span> <span class="tok-mi">1</span><span class="tok-o">);</span>
+
+<span class="tok-n">Period</span> <span class="tok-n">p</span> <span class="tok-o">=</span> <span class="tok-n">Period</span><span class="tok-o">.</span><span class="tok-na">between</span><span class="tok-o">(</span><span class="tok-n">birthday</span><span class="tok-o">,</span> <span class="tok-n">today</span><span class="tok-o">);</span>
+<span class="tok-kt">long</span> <span class="tok-n">p2</span> <span class="tok-o">=</span> <span class="tok-n">ChronoUnit</span><span class="tok-o">.</span><span class="tok-na">DAYS</span><span class="tok-o">.</span><span class="tok-na">between</span><span class="tok-o">(</span><span class="tok-n">birthday</span><span class="tok-o">,</span> <span class="tok-n">today</span><span class="tok-o">);</span>
+<span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-s">&quot;You are &quot;</span> <span class="tok-o">+</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-na">getYears</span><span class="tok-o">()</span> <span class="tok-o">+</span> <span class="tok-s">&quot; years, &quot;</span> <span class="tok-o">+</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-na">getMonths</span><span class="tok-o">()</span> <span class="tok-o">+</span>
+                   <span class="tok-s">&quot; months, and &quot;</span> <span class="tok-o">+</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-na">getDays</span><span class="tok-o">()</span> <span class="tok-o">+</span>
+                   <span class="tok-s">&quot; days old. (&quot;</span> <span class="tok-o">+</span> <span class="tok-n">p2</span> <span class="tok-o">+</span> <span class="tok-s">&quot; days total)&quot;</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>== Clock</p>
+</div>
+<div class="paragraph">
+<p>大多数<code>temporal-based</code>类提供了无参方法<code>now</code>提供当前时间。同时也提供了一个含Clock参数的构造方法<code>now(Clock)</code>。当前时间依赖于时区。</p>
+</div>
+<div class="paragraph">
+<p>Clock是抽象类，提供了几个工厂方法</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Clock.offset(Clock, Duration)</code>返回时间落后duration的时间</p>
+</li>
+<li>
+<p><code>Clock.systemUTC()</code>返回格林尼治时区</p>
+</li>
+<li>
+<p><code>Clock.fixed(Instant, ZoneId)</code>返回相同的Instant，这个instant不会变</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>== Non-ISO Date Conversion</p>
+</div>
+<div class="paragraph">
+<p><code>java.time.chrono</code>包提供了一些预定义的non ISO-based日历，例如
+Japanese, Hijrah, Minguo, Thai Buddhist.</p>
+</div>
+<div class="paragraph">
+<p>于是引出ISO-based classes和non ISO-based classes之间如何转换的问题。</p>
+</div>
+<div class="paragraph">
+<p>代码示例</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">LocalDateTime</span> <span class="tok-n">date</span> <span class="tok-o">=</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-mi">2013</span><span class="tok-o">,</span> <span class="tok-n">Month</span><span class="tok-o">.</span><span class="tok-na">JULY</span><span class="tok-o">,</span> <span class="tok-mi">20</span><span class="tok-o">,</span> <span class="tok-mi">19</span><span class="tok-o">,</span> <span class="tok-mi">30</span><span class="tok-o">);</span>
+<span class="tok-n">JapaneseDate</span> <span class="tok-n">jdate</span>     <span class="tok-o">=</span> <span class="tok-n">JapaneseDate</span><span class="tok-o">.</span><span class="tok-na">from</span><span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">);</span>
+<span class="tok-n">HijrahDate</span> <span class="tok-n">hdate</span>       <span class="tok-o">=</span> <span class="tok-n">HijrahDate</span><span class="tok-o">.</span><span class="tok-na">from</span><span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">);</span>
+<span class="tok-n">MinguoDate</span> <span class="tok-n">mdate</span>       <span class="tok-o">=</span> <span class="tok-n">MinguoDate</span><span class="tok-o">.</span><span class="tok-na">from</span><span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">);</span>
+<span class="tok-n">ThaiBuddhistDate</span> <span class="tok-n">tdate</span> <span class="tok-o">=</span> <span class="tok-n">ThaiBuddhistDate</span><span class="tok-o">.</span><span class="tok-na">from</span><span class="tok-o">(</span><span class="tok-n">date</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-n">String</span> <span class="tok-nf">toString</span><span class="tok-o">(</span><span class="tok-n">LocalDate</span> <span class="tok-n">localDate</span><span class="tok-o">,</span> <span class="tok-n">Chronology</span> <span class="tok-n">chrono</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">localDate</span> <span class="tok-o">!=</span> <span class="tok-kc">null</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+        <span class="tok-n">Locale</span> <span class="tok-n">locale</span> <span class="tok-o">=</span> <span class="tok-n">Locale</span><span class="tok-o">.</span><span class="tok-na">getDefault</span><span class="tok-o">(</span><span class="tok-n">Locale</span><span class="tok-o">.</span><span class="tok-na">Category</span><span class="tok-o">.</span><span class="tok-na">FORMAT</span><span class="tok-o">);</span>
+        <span class="tok-n">ChronoLocalDate</span> <span class="tok-n">cDate</span><span class="tok-o">;</span>
+        <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">chrono</span> <span class="tok-o">==</span> <span class="tok-kc">null</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+            <span class="tok-n">chrono</span> <span class="tok-o">=</span> <span class="tok-n">IsoChronology</span><span class="tok-o">.</span><span class="tok-na">INSTANCE</span><span class="tok-o">;</span>
+        <span class="tok-o">}</span>
+        <span class="tok-k">try</span> <span class="tok-o">{</span>
+            <span class="tok-n">cDate</span> <span class="tok-o">=</span> <span class="tok-n">chrono</span><span class="tok-o">.</span><span class="tok-na">date</span><span class="tok-o">(</span><span class="tok-n">localDate</span><span class="tok-o">);</span>
+        <span class="tok-o">}</span> <span class="tok-k">catch</span> <span class="tok-o">(</span><span class="tok-n">DateTimeException</span> <span class="tok-n">ex</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+            <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">err</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-n">ex</span><span class="tok-o">);</span>
+            <span class="tok-n">chrono</span> <span class="tok-o">=</span> <span class="tok-n">IsoChronology</span><span class="tok-o">.</span><span class="tok-na">INSTANCE</span><span class="tok-o">;</span>
+            <span class="tok-n">cDate</span> <span class="tok-o">=</span> <span class="tok-n">localDate</span><span class="tok-o">;</span>
+        <span class="tok-o">}</span>
+        <span class="tok-n">DateTimeFormatter</span> <span class="tok-n">dateFormatter</span> <span class="tok-o">=</span>
+            <span class="tok-n">DateTimeFormatter</span><span class="tok-o">.</span><span class="tok-na">ofLocalizedDate</span><span class="tok-o">(</span><span class="tok-n">FormatStyle</span><span class="tok-o">.</span><span class="tok-na">SHORT</span><span class="tok-o">)</span>
+                             <span class="tok-o">.</span><span class="tok-na">withLocale</span><span class="tok-o">(</span><span class="tok-n">locale</span><span class="tok-o">)</span>
+                             <span class="tok-o">.</span><span class="tok-na">withChronology</span><span class="tok-o">(</span><span class="tok-n">chrono</span><span class="tok-o">)</span>
+                             <span class="tok-o">.</span><span class="tok-na">withDecimalStyle</span><span class="tok-o">(</span><span class="tok-n">DecimalStyle</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">locale</span><span class="tok-o">));</span>
+        <span class="tok-n">String</span> <span class="tok-n">pattern</span> <span class="tok-o">=</span> <span class="tok-s">&quot;M/d/yyyy GGGGG&quot;</span><span class="tok-o">;</span>
+        <span class="tok-k">return</span> <span class="tok-n">dateFormatter</span><span class="tok-o">.</span><span class="tok-na">format</span><span class="tok-o">(</span><span class="tok-n">cDate</span><span class="tok-o">);</span>
+    <span class="tok-o">}</span> <span class="tok-k">else</span> <span class="tok-o">{</span>
+        <span class="tok-k">return</span> <span class="tok-s">&quot;&quot;</span><span class="tok-o">;</span>
+    <span class="tok-o">}</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>转化为ISO-based classes</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-n">LocalDate</span> <span class="tok-nf">fromString</span><span class="tok-o">(</span><span class="tok-n">String</span> <span class="tok-n">text</span><span class="tok-o">,</span> <span class="tok-n">Chronology</span> <span class="tok-n">chrono</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+    <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">text</span> <span class="tok-o">!=</span> <span class="tok-kc">null</span> <span class="tok-o">&amp;&amp;</span> <span class="tok-o">!</span><span class="tok-n">text</span><span class="tok-o">.</span><span class="tok-na">isEmpty</span><span class="tok-o">())</span> <span class="tok-o">{</span>
+        <span class="tok-n">Locale</span> <span class="tok-n">locale</span> <span class="tok-o">=</span> <span class="tok-n">Locale</span><span class="tok-o">.</span><span class="tok-na">getDefault</span><span class="tok-o">(</span><span class="tok-n">Locale</span><span class="tok-o">.</span><span class="tok-na">Category</span><span class="tok-o">.</span><span class="tok-na">FORMAT</span><span class="tok-o">);</span>
+        <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">chrono</span> <span class="tok-o">==</span> <span class="tok-kc">null</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+           <span class="tok-n">chrono</span> <span class="tok-o">=</span> <span class="tok-n">IsoChronology</span><span class="tok-o">.</span><span class="tok-na">INSTANCE</span><span class="tok-o">;</span>
+        <span class="tok-o">}</span>
+        <span class="tok-n">String</span> <span class="tok-n">pattern</span> <span class="tok-o">=</span> <span class="tok-s">&quot;M/d/yyyy GGGGG&quot;</span><span class="tok-o">;</span>
+        <span class="tok-n">DateTimeFormatter</span> <span class="tok-n">df</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-n">DateTimeFormatterBuilder</span><span class="tok-o">().</span><span class="tok-na">parseLenient</span><span class="tok-o">()</span>
+                              <span class="tok-o">.</span><span class="tok-na">appendPattern</span><span class="tok-o">(</span><span class="tok-n">pattern</span><span class="tok-o">)</span>
+                              <span class="tok-o">.</span><span class="tok-na">toFormatter</span><span class="tok-o">()</span>
+                              <span class="tok-o">.</span><span class="tok-na">withChronology</span><span class="tok-o">(</span><span class="tok-n">chrono</span><span class="tok-o">)</span>
+                              <span class="tok-o">.</span><span class="tok-na">withDecimalStyle</span><span class="tok-o">(</span><span class="tok-n">DecimalStyle</span><span class="tok-o">.</span><span class="tok-na">of</span><span class="tok-o">(</span><span class="tok-n">locale</span><span class="tok-o">));</span>
+        <span class="tok-n">TemporalAccessor</span> <span class="tok-n">temporal</span> <span class="tok-o">=</span> <span class="tok-n">df</span><span class="tok-o">.</span><span class="tok-na">parse</span><span class="tok-o">(</span><span class="tok-n">text</span><span class="tok-o">);</span>
+        <span class="tok-n">ChronoLocalDate</span> <span class="tok-n">cDate</span> <span class="tok-o">=</span> <span class="tok-n">chrono</span><span class="tok-o">.</span><span class="tok-na">date</span><span class="tok-o">(</span><span class="tok-n">temporal</span><span class="tok-o">);</span>
+        <span class="tok-k">return</span> <span class="tok-n">LocalDate</span><span class="tok-o">.</span><span class="tok-na">from</span><span class="tok-o">(</span><span class="tok-n">cDate</span><span class="tok-o">);</span>
+    <span class="tok-o">}</span>
+<span class="tok-k">return</span> <span class="tok-kc">null</span><span class="tok-o">;</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="legacy-date-time-code">Legacy Date-Time Code</h3>
+<div class="paragraph">
+<p>在java8的Date-Time API之前，都是使用<code>java.util.Date</code>, <code>java.util.Calendar</code>, <code>java.util.TimeZone</code>，这些类有些问题</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Calendar</code>不是类型安全类</p>
+</li>
+<li>
+<p>这些类不是线程安全的</p>
+</li>
+<li>
+<p>非自然的月份数常常导致错误，比如1月份从0开始</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Java8提供了一些方法便于<code>java.time</code>和<code>java.util</code>之间的对象互相转化</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Calandar.toInstant()</code>从Calendar到Instant</p>
+</li>
+<li>
+<p><code>GregorianCalendar.toZonedDateTime()</code>从GregorianCalendar到ZonedDateTime</p>
+</li>
+<li>
+<p><code>GregorianCalendar.from(ZonedDateTime) </code>从ZonedDateTime到GregorianCalendar</p>
+</li>
+<li>
+<p><code>Date.from(Instant)</code>从Instant到Date</p>
+</li>
+<li>
+<p><code>Date.toInstant()</code>从Date到Instant</p>
+</li>
+<li>
+<p><code>TimeZone.toZoneId()</code>从TimeZone到ZoneId</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>代码示例</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Calendar</span> <span class="tok-n">now</span> <span class="tok-o">=</span> <span class="tok-n">Calendar</span><span class="tok-o">.</span><span class="tok-na">getInstance</span><span class="tok-o">();</span>
+<span class="tok-n">ZonedDateTime</span> <span class="tok-n">zdt</span> <span class="tok-o">=</span> <span class="tok-n">ZonedDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">now</span><span class="tok-o">.</span><span class="tok-na">toInstant</span><span class="tok-o">(),</span> <span class="tok-n">ZoneId</span><span class="tok-o">.</span><span class="tok-na">systemDefault</span><span class="tok-o">()));</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>= Terminology</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>temporal-based classes</code>: 用于处理日期和时间的类，例如<code>Instant</code>,<code>LocalDateTime</code>和<code>ZonedDateTime</code></p>
+</li>
+</ul>
+</div>
+<div id="appxa" class="paragraph">
+<p>= Temporal-based classes</p>
+</div>
+<div id="appxb" class="paragraph">
+<p>= java.util.Date和java.time类的映射</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"><code>java.util Functionality</code></th>
+<th class="tableblock halign-left valign-top"><code>java.time Functionality</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.util.Date</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.time.Instant</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.util.GregorianCalendar</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.time.ZonedDateTime</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.util.TimeZone</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.time.ZoneId or java.time.ZoneOffset</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GregorianCalendar with the date set to 1970-01-01 </code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.time.LocalTime</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GregorianCalendar with time set to 00:00</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.time.LocalDate</code></p></td>
+</tr>
+</tbody>
+</table>
+<div id="appxc" class="paragraph">
+<p>= Quick Reference</p>
+</div>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span></span><span class="tok-n">Instant</span> <span class="tok-n">instant</span> <span class="tok-o">=</span> <span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">now</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//Instant to seconds</span>
+<span class="tok-kt">long</span> <span class="tok-n">seconds</span> <span class="tok-o">=</span> <span class="tok-n">instant</span><span class="tok-o">.</span><span class="tok-na">getEpochSecond</span><span class="tok-o">();</span>
+<span class="tok-kt">long</span> <span class="tok-n">millis</span> <span class="tok-o">=</span> <span class="tok-n">instant</span><span class="tok-o">.</span><span class="tok-na">toEpochMilli</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//Instant to OffsetDateTime</span>
+<span class="tok-n">OffsetDateTime</span> <span class="tok-n">offsetDateTime</span> <span class="tok-o">=</span> <span class="tok-n">instant</span><span class="tok-o">.</span><span class="tok-na">atOffset</span><span class="tok-o">(</span><span class="tok-n">ZoneOffset</span> <span class="tok-n">zoneOffset</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//Instant to ZonedDateTime</span>
+<span class="tok-n">ZonedDateTime</span> <span class="tok-n">zonedDateTime</span> <span class="tok-o">=</span> <span class="tok-n">instant</span><span class="tok-o">.</span><span class="tok-na">atZone</span><span class="tok-o">(</span><span class="tok-n">ZoneId</span> <span class="tok-n">zoneId</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//Instant to LocalDateTime</span>
+<span class="tok-n">LocalDateTime</span> <span class="tok-n">localDateTime</span> <span class="tok-o">=</span> <span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">Instant</span> <span class="tok-n">instant</span><span class="tok-o">,</span> <span class="tok-n">ZoneId</span> <span class="tok-n">zoneId</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//OffsetDateTime to LocalDateTime</span>
+<span class="tok-n">offsetDateTime</span><span class="tok-o">.</span><span class="tok-na">toLocalDateTime</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//OffsetDateTime to Instant</span>
+<span class="tok-n">offsetDateTime</span><span class="tok-o">.</span><span class="tok-na">toInstant</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//OffsetDateTime to seconds</span>
+<span class="tok-n">offsetDateTime</span><span class="tok-o">.</span><span class="tok-na">toEpochSecond</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//OffsetDateTime to ZonedDateTime</span>
+<span class="tok-n">offsetDateTime</span><span class="tok-o">.</span><span class="tok-na">toZonedDateTime</span><span class="tok-o">();</span>
+
+
+<span class="tok-c1">//ZonedDateTime to Instant</span>
+<span class="tok-n">zonedDateTime</span><span class="tok-o">.</span><span class="tok-na">toInstant</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//ZonedDateTime to LocalDateTime</span>
+<span class="tok-n">zonedDateTime</span><span class="tok-o">.</span><span class="tok-na">toLocalDateTime</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//ZonedDateTime to OffsetDateTime</span>
+<span class="tok-n">zonedDateTime</span><span class="tok-o">.</span><span class="tok-na">toOffsetDateTime</span><span class="tok-o">();</span>
+
+<span class="tok-c1">//ZonedDateTime to seconds</span>
+<span class="tok-n">zonedDateTime</span><span class="tok-o">.</span><span class="tok-na">toEpochSecond</span><span class="tok-o">();</span>
+
+
+<span class="tok-c1">//LocalDateTime to Instant</span>
+<span class="tok-n">Instant</span> <span class="tok-n">instant</span> <span class="tok-o">=</span> <span class="tok-n">localDateTime</span><span class="tok-o">.</span><span class="tok-na">toInstant</span><span class="tok-o">(</span><span class="tok-n">ZoneOffset</span> <span class="tok-n">zoneOffset</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//LocalDateTime to seconds</span>
+<span class="tok-n">localDateTime</span><span class="tok-o">.</span><span class="tok-na">toEpochSecond</span><span class="tok-o">(</span><span class="tok-n">ZoneOffset</span> <span class="tok-n">zoneOffset</span><span class="tok-o">)</span>
+
+<span class="tok-c1">//LocalDateTime to OffsetDateTime</span>
+<span class="tok-n">localDateTime</span><span class="tok-o">.</span><span class="tok-na">atOffset</span><span class="tok-o">(</span><span class="tok-n">ZoneOffset</span> <span class="tok-n">zoneOffset</span><span class="tok-o">)</span>
+
+<span class="tok-c1">//LocalDateTime to ZonedDateTime</span>
+<span class="tok-n">ZonedDateTime</span> <span class="tok-n">zonedDateTime</span> <span class="tok-o">=</span> <span class="tok-n">localDateTime</span><span class="tok-o">.</span><span class="tok-na">atZone</span><span class="tok-o">(</span><span class="tok-n">ZoneId</span> <span class="tok-n">zoneId</span><span class="tok-o">);</span>
+<span class="tok-n">ZonedDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">LocalDateTime</span> <span class="tok-n">localDateTime</span><span class="tok-o">,</span> <span class="tok-n">ZoneOffset</span> <span class="tok-n">offset</span><span class="tok-o">,</span> <span class="tok-n">ZoneId</span> <span class="tok-n">zone</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//seconds to Instant</span>
+<span class="tok-n">Instant</span> <span class="tok-n">instant</span> <span class="tok-o">=</span> <span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">ofEpochSecond</span><span class="tok-o">(</span><span class="tok-n">seconds</span><span class="tok-o">);</span>
+<span class="tok-n">Instant</span> <span class="tok-n">instant</span> <span class="tok-o">=</span> <span class="tok-n">Instant</span><span class="tok-o">.</span><span class="tok-na">ofEpochMilli</span><span class="tok-o">(</span><span class="tok-n">millis</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//seconds to LocalDateTime</span>
+<span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">ofEpochSecond</span><span class="tok-o">(</span><span class="tok-kt">long</span> <span class="tok-n">epochSecond</span><span class="tok-o">,</span> <span class="tok-kt">int</span> <span class="tok-n">nanoOfSecond</span><span class="tok-o">,</span> <span class="tok-n">ZoneOffset</span> <span class="tok-n">offset</span><span class="tok-o">);</span>
+<span class="tok-n">LocalDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">Instant</span> <span class="tok-n">instant</span><span class="tok-o">,</span> <span class="tok-n">ZoneId</span> <span class="tok-n">zone</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//seconds to OffsetDateTime</span>
+<span class="tok-n">OffsetDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">Instant</span> <span class="tok-n">instant</span><span class="tok-o">,</span> <span class="tok-n">ZoneId</span> <span class="tok-n">zone</span><span class="tok-o">);</span>
+
+<span class="tok-c1">//seconds to ZonedDateTime</span>
+<span class="tok-n">ZonedDateTime</span><span class="tok-o">.</span><span class="tok-na">ofInstant</span><span class="tok-o">(</span><span class="tok-n">Instant</span> <span class="tok-n">instant</span><span class="tok-o">,</span> <span class="tok-n">ZoneId</span> <span class="tok-n">zone</span><span class="tok-o">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/datetime/index.html" class="bare">https://docs.oracle.com/javase/8/docs/technotes/guides/datetime/index.html</a>
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. <a href="http://cldr.unicode.org/" class="bare">http://cldr.unicode.org/</a>
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. <a href="http://www.iana.org/time-zones" class="bare">http://www.iana.org/time-zones</a>
+</div>
+</div>
+        </section>
+
+        <aside id="sidebar">
+          
+
+          
+            <p class="repo-owner"><a href="https://github.com/codingwen/codingwen.github.io">codingwen.github.io</a> is maintained by <a href="https://github.com/codingwen">codingwen</a>.</p>
+          
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</p>
+          <p><ul class="sectlevel1">
+<li><a href="#概览">概览</a></li>
+<li><a href="#接口">接口</a>
+<ul class="sectlevel2">
+<li><a href="#design-principles">Design Principles</a></li>
+<li><a href="#method-naming-conventions">Method Naming Conventions</a></li>
+</ul>
+</li>
+<li><a href="#standard-calendar">Standard Calendar</a>
+<ul class="sectlevel2">
+<li><a href="#overview">Overview</a></li>
+<li><a href="#dayofweek-and-month-enums">DayOfWeek and Month Enums</a></li>
+<li><a href="#date-classes">Date Classes</a></li>
+<li><a href="#date-and-time-classes">Date and Time classes</a></li>
+<li><a href="#time-zone-and-offset-classes">Time Zone and Offset Classes</a></li>
+<li><a href="#period-and-duration">Period and Duration</a></li>
+<li><a href="#legacy-date-time-code">Legacy Date-Time Code</a></li>
+</ul>
+</li>
+</ul>          </p>
+        </aside>
+      </div>
+    </div>
+
+    
+  </body>
+</html>
