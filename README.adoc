@@ -5,3 +5,5 @@
 因为希望能够采用asciidoc写作，搜到过Antora，经过一番研究，发现它用作文档写作和归集还是不错的，但是作为blog就不合适了。
 
 而Jekyll生态比较丰富，也有asciidoc插件提供。
+
+但是Github Pages不支持插件https://github.com/asciidoctor/jekyll-asciidoc[jekyll-asciidoc]，所以通过https://travis-ci.com/[travis-ci]进行编译和部署

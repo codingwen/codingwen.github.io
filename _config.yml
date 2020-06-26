@@ -22,10 +22,10 @@ port: 8000
 title: codingwen's land
 email: dldtdd@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  A man who never makes mistake, wil never make anything.
+  拖延是因为不够热爱
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://ikoding.net" # the base hostname & protocol for your site, e.g. http://example.com
-logo: favicon.png
+logo: /favicon.png
 twitter_username: codingwen
 github_username:  codingwen
 
