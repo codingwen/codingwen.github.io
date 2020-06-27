@@ -1,7 +1,7 @@
 = DateTime API
 :page-title: "Java8 DateTime API"
 :page-layout: post
-:page-permalink: java8-datetim-api.html
+:page-permalink: java8-datetime-api.html
 :page-date:   2020-06-26 09:09:40 +0800
 :page-categories: java8 datetime
 

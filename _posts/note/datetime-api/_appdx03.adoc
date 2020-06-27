@@ -1,6 +1,6 @@
 = Quick Reference
 
-====
+.常用示例
 [source,java]
 ----
 Instant instant = Instant.now();

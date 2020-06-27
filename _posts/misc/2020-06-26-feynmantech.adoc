@@ -1,0 +1,21 @@
+= 费曼学习法
+:page-title: "费曼学习法"
+:page-layout: post
+:page-permalink: feynmantech.html
+:page-date:   2020-06-26 00:17:55 +0800
+:page-categories: miscellaneou
+
+== Feynman Technical
+
+诺贝尔奖获得者Feynman教授，以能把极其复杂概念解释给几乎所有人而闻名。
+
+== 技巧
+
+. Have a concept in mind:: 套用一句话就是当我们谈论概念的时候我们在谈论什么
+. Explain in simple language:: 
+    可以把解释写下来，就当作在一群三年级学生上课，不要复杂词汇，使用简单语句
+. Look for gaps in knowledge::
+    找到空缺的知识——在解释过程中发现那些并不真正了解的，只能用复杂词汇描述的知识
+. Fill in the gap::
+    填补这些空缺
+. Repeat the progress:: 重复上述步骤直至明白无误    
