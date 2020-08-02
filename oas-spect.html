@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/assets/css/style.css?v=e4965f2d2201889e079eb7c7063019b896e3435d" media="screen" type="text/css">
+    <link rel="stylesheet" href="/assets/css/print.css" media="print" type="text/css">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>OAS spec | codingwen’s land</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="OAS spec" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="OAS 介绍" />
+<meta property="og:description" content="OAS 介绍" />
+<link rel="canonical" href="http://ikoding.net/oas-spect.html" />
+<meta property="og:url" content="http://ikoding.net/oas-spect.html" />
+<meta property="og:site_name" content="codingwen’s land" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-28T13:19:40+00:00" />
+<script type="application/ld+json">
+{"description":"OAS 介绍","@type":"BlogPosting","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://ikoding.net/favicon.png"}},"url":"http://ikoding.net/oas-spect.html","headline":"OAS spec","dateModified":"2020-06-28T13:19:40+00:00","datePublished":"2020-06-28T13:19:40+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://ikoding.net/oas-spect.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <a href="http://ikoding.net/">
+          <h1>codingwen's land</h1>
+        </a>
+        <h2>拖延是因为不够热爱</h2>
+        
+          <a href="https://github.com/codingwen/codingwen.github.io" class="button"><small>View project on</small> GitHub</a>
+        
+        
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <div class="sect1">
+<h2 id="oas-介绍">OAS 介绍</h2>
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>The OpenAPI Specification (OAS) defines a standard, language-agnostic interface to RESTful APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code, documentation, or through network traffic inspection. When properly defined, a consumer can understand and interact with the remote service with a minimal amount of implementation logic.</p>
+</div>
+<div class="paragraph">
+<p>An OpenAPI definition can then be used by documentation generation tools to display the API, code generation tools to generate servers and clients in various programming languages, testing tools, and many other use cases.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; oas specification
+</div>
+</div>
+<div class="paragraph">
+<p>The OpenAPI Specification(OAS)的目标是针对RESTful API，定义标准的、与实现语言无关的接口，同时允许计算机和人都能够理解与发现，无需阅读源码。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="概览">概览</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://swagger.io/specification/">OAS</a>的规格包含如下元素</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Versions</p>
+</li>
+<li>
+<p>Format</p>
+</li>
+<li>
+<p>Document Types</p>
+</li>
+<li>
+<p>Rich Text Formatting</p>
+</li>
+<li>
+<p>Relative References in</p>
+</li>
+<li>
+<p>URLs</p>
+</li>
+<li>
+<p>Schema</p>
+</li>
+<li>
+<p>Specification Extensions</p>
+</li>
+<li>
+<p>Security Filtering</p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="versions">Versions</h3>
+<div class="paragraph">
+<p>OAS 的version属性遵循<a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning 2.0.0</a>规范，采用<mark>MAJOR.MINOR.PATCH</mark>形式</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="format">Format</h3>
+<div class="paragraph">
+<p>OpenAPI Specification规定Open API document应该是一个JSON对象，在展现形式上可以是json或者yaml文件格式。</p>
+</div>
+<div class="paragraph">
+<p>所有属性名称是大小写有别的。</p>
+</div>
+<div class="paragraph">
+<p>而schema的属性(field)有两种类型:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>固定(fixed)</p>
+</li>
+<li>
+<p>模式(patterned)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>后者在包含的对象中必须拥有唯一的名称。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="文档结构document-structure">文档结构(Document Structure)</h3>
+<div class="paragraph">
+<p>OpenAPI文档可以是单一文档，也可以由作者根据意愿分为多个部分后组成一个文档，通过使用<mark>$ref</mark>属性引用相关的部分。</p>
+</div>
+<div class="paragraph">
+<p>所有这些文档必须符合<a href="https://json-schema.org/">Json Schema</a>的定义</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="数据类型data-types">数据类型(Data Types)</h3>
+<div class="paragraph">
+<p>基本数据类型基于<a href="https://tools.ietf.org/html/draft-wright-json-schema-00#section-4.2"> JSON Schema Specification Wright Draft 00</a>。</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+integer属性是是没有小数或者指数的JSON number.
+<mark>null</mark> 不属于类型
+而<mark>Model</mark>则使用<a href="https://swagger.io/specification/#schema-object">Schema Object</a>定义
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>基本类型具有可选的修饰符: <mark>format</mark></p>
+</div>
+<div class="paragraph">
+<p>OAS的定义见附件A</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="多样文本格式rich-text-formatting">多样文本格式(Rich Text Formatting)</h3>
+<div class="paragraph">
+<p>在OAS的定义中，<mark>description</mark>需要支持符合CommonMark语义的markdown格式。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="urls中的相关引用relative-references-in-urls">URLs中的相关引用(Relative References in URLs)</h3>
+<div class="paragraph">
+<p>相关引用使用<mark>$ref</mark>，会被当作<a href="https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03">JSON Reference</a>进行处理</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="schema">Schema</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="openapi-文档结构">OpenAPI 文档结构</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Fix Fields</caption>
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Required</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">openapi</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">采用semantic version number(OAS 2.0版本此属性为<mark>swagger</mark>，值只能为2.0)，这个属性是指文档采用的OAS版本，和<mark>info.version</mark>没有关系</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">info</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Info Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">提供API的metadata</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">servers</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[Server Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An array of Server Objects, which provide connectivity information to a target server.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">paths</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Paths Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The available paths and operations for the API.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">components</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Components Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An element to hold various schemas for the specification.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">security</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[Security Requirement Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A declaration of which security mechanisms can be used across the API. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. Individual operations can override this definition. To make security optional, an empty security requirement ({}) can be included in the array.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">tags</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[Tag Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of tags used by the specification with additional metadata. The order of the tags can be used to reflect on their order by the parsing tools. Not all tags that are used by the Operation Object must be declared. The tags that are not declared MAY be organized randomly or based on the tools' logic. Each tag name in the list MUST be unique.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">externalDocs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">External Documentation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Additional external documentation.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="title">Example 1. 完整示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>openapi: "3.0.0"                             <b class="conum">(1)</b>
+info:                                        <b class="conum">(2)</b>
+  version: "0.0.1"
+  title: "Swagger UI Webpack Setup"
+  description: "Demonstrates Swagger UI with Webpack including CSS and OAuth"
+servers:                                     <b class="conum">(3)</b>
+  - url: "https://demo.identityserver.io/api"
+    description: "开发环境"
+  - url: "https://demo1.identityserver.io/api"
+    description: "线上环境"
+components:                                  <b class="conum">(4)</b>
+  securitySchemes:
+    # See https://demo.identityserver.io/ for configuration details.
+    identity_server_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: "https://demo.identityserver.io/connect/authorize"
+          scopes:
+            api: "api"
+security:                                    <b class="conum">(5)</b>
+  - identity_server_auth:
+    - api
+paths:                                       <b class="conum">(6)</b>
+  /test:                                     <b class="conum">(7)</b>
+    get:                                     <b class="conum">(8)</b>
+      summary: "Runs a test request against the Identity Server demo API"
+      responses:
+        401:
+          description: "Unauthorized"
+        200:
+          description: "OK"
+        23283239:
+          description: "III</pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>openapi版本</p>
+</li>
+<li>
+<p>Info Object</p>
+</li>
+<li>
+<p>Server Objects</p>
+</li>
+<li>
+<p>Components Object</p>
+</li>
+<li>
+<p>Security Requirement Objects</p>
+</li>
+<li>
+<p>Paths Object</p>
+</li>
+<li>
+<p>Path Templating Matching</p>
+</li>
+<li>
+<p>Path Item Object</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="info-object">Info Object</h3>
+<div class="paragraph">
+<p>The object provides metadata about the API. The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation tools for convenience.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Fix Fields</caption>
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Required</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">title</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The title of the API.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">description</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A short description of the API. <a href="https://spec.commonmark.org/">CommonMark syntax</a> MAY be used for rich text representation.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">termsOfService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A URL to the Terms of Service for the API. MUST be in the format of a URL.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">contact</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contact Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The contact information for the exposed API.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">license</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">License Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The license information for the exposed API.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The version of the OpenAPI document（不同于OpenAPI属性）</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="title">Example 2. Info Object示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "title": "Sample Pet Store App",
+  "description": "This is a sample server for a pet store.",
+  "termsOfService": "http://example.com/terms/",
+  "contact": {
+    "name": "API Support",
+    "url": "http://www.example.com/support",
+    "email": "support@example.com"
+  },
+  "license": {
+    "name": "Apache 2.0",
+    "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+  },
+  "version": "1.0.1"
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>title: Sample Pet Store App
+description: This is a sample server for a pet store.
+termsOfService: http://example.com/terms/
+contact:            <b class="conum">(1)</b>
+  name: API Support
+  url: http://www.example.com/support
+  email: support@example.com
+license:            <b class="conum">(2)</b>
+  name: Apache 2.0
+  url: https://www.apache.org/licenses/LICENSE-2.0.html
+version: 1.0.1</pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Contact Object</p>
+</li>
+<li>
+<p>License Object</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="server-object">Server Object</h3>
+<div class="paragraph">
+<p>An object representing a Server.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 3. Fix Fields</caption>
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Required</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A URL to the target host. This URL supports Server Variables and MAY be relative, to indicate that the host location is relative to the location where the OpenAPI document is being served. Variable substitutions will be made when a variable is named in <code>{brackets}</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">description</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional string describing the host designated by the URL. CommonMark syntax MAY be used for rich text representation.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">variables</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Server Variable Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A map between a variable name and its value. The value is used for substitution in the server&#8217;s URL template.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="title">Example 3. Server Object Example</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "url": "https://development.gigantic-server.com/v1",
+  "description": "Development server"
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>url: https://development.gigantic-server.com/v1
+description: Development server</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 4. Multiple Server Object Example</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "servers": [
+    {
+      "url": "https://development.gigantic-server.com/v1",
+      "description": "Development server"
+    },
+    {
+      "url": "https://staging.gigantic-server.com/v1",
+      "description": "Staging server"
+    },
+    {
+      "url": "https://api.gigantic-server.com/v1",
+      "description": "Production server"
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>servers:
+- url: https://development.gigantic-server.com/v1
+  description: Development server
+- url: https://staging.gigantic-server.com/v1
+  description: Staging server
+- url: https://api.gigantic-server.com/v1
+  description: Production server</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="server-variable-object">Server Variable Object</h3>
+<div class="paragraph">
+<p>An object representing a Server Variable for server URL template substitution.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. Fix Fields</caption>
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Required</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">enum</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[string]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An enumeration of string values to be used if the substitution options are from a limited set. The array SHOULD NOT be empty.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">default</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The default value to use for substitution, which SHALL be sent if an alternate value is not supplied.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">description</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional description for the server variable.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="title">Example 5. Server Variables Examples</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "servers": [
+    {
+      "url": "https://{username}.gigantic-server.com:{port}/{basePath}",
+      "description": "The production API server",
+      "variables": {
+        "username": {
+          "default": "demo",
+          "description": "this value is assigned by the service provider, in this example `gigantic-server.com`"
+        },
+        "port": {
+          "enum": [
+            "8443",
+            "443"
+          ],
+          "default": "8443"
+        },
+        "basePath": {
+          "default": "v2"
+        }
+      }
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>servers:
+- url: https://{username}.gigantic-server.com:{port}/{basePath}
+  description: The production API server
+  variables:
+    username:
+      # note! no enum here means it is an open value
+      default: demo
+      description: this value is assigned by the service provider, in this example `gigantic-server.com`
+    port:
+      enum:
+        - '8443'
+        - '443'
+      default: '8443'
+    basePath:
+      # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v2`
+      default: v2</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="paths-object">Paths Object</h3>
+<div class="exampleblock">
+<div class="title">Example 6. Paths Object 结构如下</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>paths:
+  /path1:                   <b class="conum">(1)</b>
+    get:                    <b class="conum">(2)</b>
+      description: xxx      <b class="conum">(3)</b>
+      summary: xxx          <b class="conum">(4)</b>
+      tags: []              <b class="conum">(5)</b>
+      operationId: xxx      <b class="conum">(6)</b>
+      parameters:           <b class="conum">(7)</b>
+      requestBody: {}       <b class="conum">(8)</b>
+      responses: []         <b class="conum">(9)</b>
+      security: []          <b class="conum">(10)</b>
+    post:
+    put:
+  path2:
+    get:
+    post:
+    put:</pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>接口路径</p>
+</li>
+<li>
+<p>接口Http方法</p>
+</li>
+<li>
+<p>接口详细说明</p>
+</li>
+<li>
+<p>接口简略说明</p>
+</li>
+<li>
+<p>接口标签</p>
+</li>
+<li>
+<p>接口ID</p>
+</li>
+<li>
+<p>请求参数</p>
+</li>
+<li>
+<p>请求体</p>
+</li>
+<li>
+<p>响应体</p>
+</li>
+<li>
+<p>安全需求</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="path-item-object">Path Item Object</h3>
+<div class="paragraph">
+<p>Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 5. Fix Fields</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>$ref</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows for an external definition of this path item. The referenced structure MUST be in the format of a Path Item Object. In case a Path Item Object field appears both in the defined object and the referenced object, the behavior is undefined.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">summary</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional, string summary, intended to apply to all operations in this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">description</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional, string description, intended to apply to all operations in this path. CommonMark syntax MAY be used for rich text representation.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">get</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a GET operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">put</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a PUT operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">post</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a POST operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">delete</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a DELETE operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">options</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a OPTIONS operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">head</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a HEAD operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">patch</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a PATCH operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">trace</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operation Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A definition of a TRACE operation on this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">servers</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[Server Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An alternative server array to service all operations in this path.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">parameters</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[Parameter Object | Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="title">Example 7. Path Item Object Example</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "get": {
+    "description": "Returns pets based on ID",
+    "summary": "Find pets by ID",
+    "operationId": "getPetsById",
+    "responses": {
+      "200": {
+        "description": "pet response",
+        "content": {
+          "*/*": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        }
+      },
+      "default": {
+        "description": "error payload",
+        "content": {
+          "text/html": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": [
+    {
+      "name": "id",
+      "in": "path",
+      "description": "ID of pet to use",
+      "required": true,
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "style": "simple"
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>get:         <b class="conum">(1)</b>
+  description: Returns pets based on ID
+  summary: Find pets by ID   <b class="conum">(2)</b>
+  operationId: getPetsById   <b class="conum">(3)</b>
+  responses:
+    '200':                   <b class="conum">(4)</b>
+      description: pet response
+      content:
+        '*/*' :              <b class="conum">(5)</b>
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'   <b class="conum">(6)</b>
+    default:                                     <b class="conum">(7)</b>
+      description: error payload
+      content:
+        'text/html':
+          schema:
+            $ref: '#/components/schemas/ErrorModel'
+parameters:                    <b class="conum">(8)</b>
+- name: id
+  in: path
+  description: ID of pet to use
+  required: true
+  schema:
+    type: array
+    items:
+      type: string
+  style: simple</pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Http方法</p>
+</li>
+<li>
+<p>接口名称</p>
+</li>
+<li>
+<p>接口ID</p>
+</li>
+<li>
+<p>响应状态码</p>
+</li>
+<li>
+<p>MediaType</p>
+</li>
+<li>
+<p>引用</p>
+</li>
+<li>
+<p>默认响应</p>
+</li>
+<li>
+<p>参数</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="external-documentation-object">External Documentation Object</h3>
+<div class="paragraph">
+<p>Allows referencing an external resource for extended documentation.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 6. Fix Fields</caption>
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Required</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">description</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A short description of the target documentation.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Y</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL for the target documentation.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="title">Example 8. External Documentation Object Example</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>{
+  "description": "Find more info here",
+  "url": "https://example.com"
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>description: Find more info here
+url: https://example.com</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="components-object">Components Object</h3>
+<div class="paragraph">
+<p>Holds a set of reusable objects for different aspects of the OAS. All objects defined within the components object will have no effect on the API unless they are explicitly referenced from properties outside the components object.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 7. Fix Fields</caption>
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Required</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">schemas</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Schema Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Schema Objects.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">responses</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Response Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Response Objects.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">parameters</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Parameter Object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Parameter Objects.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">examples</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Example Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Example Objects.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">requestBodies</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Request Body Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Request Body Objects.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">headers</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Header Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Header Objects.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">securitySchemes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Security Scheme Object</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Security Scheme Objects.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">links</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Link Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object to hold reusable Link Objects.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">callbacks</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map[string, Callback Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference Object]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+所有的field name必须匹配表达式<mark> <code>^[a-zA-Z0-9\.\-_]+$</mark></code>
+</td>
+</tr>
+</table>
+</div>
+<div class="exampleblock">
+<div class="title">Example 9. Field Name Examples:</div>
+<div class="content">
+<div class="paragraph">
+<p>User
+User_1
+User_Name
+user-name
+my.org.User</p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="title">Example 10. Components Object Example</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>"components": {
+  "schemas": {
+    "GeneralError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "skipParam": {
+      "name": "skip",
+      "in": "query",
+      "description": "number of items to skip",
+      "required": true,
+      "schema": {
+        "type": "integer",
+        "format": "int32"
+      }
+    },
+    "limitParam": {
+      "name": "limit",
+      "in": "query",
+      "description": "max records to return",
+      "required": true,
+      "schema" : {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "responses": {
+    "NotFound": {
+      "description": "Entity not found."
+    },
+    "IllegalInput": {
+      "description": "Illegal input for operation."
+    },
+    "GeneralError": {
+      "description": "General Error",
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/GeneralError"
+          }
+        }
+      }
+    }
+  },
+  "securitySchemes": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    },
+    "petstore_auth": {
+      "type": "oauth2",
+      "flows": {
+        "implicit": {
+          "authorizationUrl": "http://example.org/api/oauth/dialog",
+          "scopes": {
+            "write:pets": "modify pets in your account",
+            "read:pets": "read your pets"
+          }
+        }
+      }
+    }
+  }
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>components:
+  schemas:
+    GeneralError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+  parameters:
+    skipParam:
+      name: skip
+      in: query
+      description: number of items to skip
+      required: true
+      schema:
+        type: integer
+        format: int32
+    limitParam:
+      name: limit
+      in: query
+      description: max records to return
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    NotFound:
+      description: Entity not found.
+    IllegalInput:
+      description: Illegal input for operation.
+    GeneralError:
+      description: General Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeneralError'
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://example.org/api/oauth/dialog
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="components-示例">Components 示例</h3>
+<div class="exampleblock">
+<div class="title">Example 11. components示例</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>components:
+  #-------------------------------
+  # Reusable schemas (data models)
+  #-------------------------------
+  schemas:
+    User:             # Can be referenced as '#/components/schemas/User'
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    Error:            # Can be referenced as '#/components/schemas/Error'
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+
+  #-------------------------------
+  # Reusable operation parameters
+  #-------------------------------
+  parameters:
+    offsetParam:      # Can be referenced via '#/components/parameters/offsetParam'
+      name: offset
+      in: query
+      description: Number of items to skip before returning the results.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+
+    limitParam:       # Can be referenced as '#/components/parameters/limitParam'
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  #-------------------------------
+  # Reusable responses
+  #-------------------------------
+  responses:
+    404NotFound:       # Can be referenced as '#/components/responses/404NotFound'
+      description: The specified resource was not found.
+
+    ImageResponse:     # Can be referenced as '#/components/responses/ImageResponse'
+      description: An image.
+      content:
+        image/*:
+          schema:
+            type: string
+            format: binary
+
+    GenericError:      # Can be referenced as '#/components/responses/GenericError'
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+   securitySchemes:
+    name:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    basic:
+      type: http
+      scheme: basic
+    apiKey:
+      type: apiKey
+      name: api_key
+      in: query</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="appxa">Appendix A: OAS formats</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 8. 格式</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">type</th>
+<th class="tableblock halign-left valign-top">format</th>
+<th class="tableblock halign-left valign-top">comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int32</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">signed 32 bits</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">signed 64 bits (a.k.a long)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">float</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">double</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">byte</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">base64 encoded characters</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">binary</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">any sequence of octets</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">date</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">As defined by <mark>full-date</mark> - <a href="https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14">RFC3339</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">date-time</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">As defined by <mark>date-time</mark> - <a href="https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14">RFC3339</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A hint to UIs to obscure input.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+        </section>
+
+        <aside id="sidebar">
+          
+
+          
+            <p class="repo-owner"><a href="https://github.com/codingwen/codingwen.github.io">codingwen.github.io</a> is maintained by <a href="https://github.com/codingwen">codingwen</a>.</p>
+          
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</p>
+          <p><ul class="sectlevel1">
+<li><a href="#oas-介绍">OAS 介绍</a></li>
+<li><a href="#概览">概览</a>
+<ul class="sectlevel2">
+<li><a href="#versions">Versions</a></li>
+<li><a href="#format">Format</a></li>
+<li><a href="#文档结构document-structure">文档结构(Document Structure)</a></li>
+<li><a href="#数据类型data-types">数据类型(Data Types)</a></li>
+<li><a href="#多样文本格式rich-text-formatting">多样文本格式(Rich Text Formatting)</a></li>
+<li><a href="#urls中的相关引用relative-references-in-urls">URLs中的相关引用(Relative References in URLs)</a></li>
+</ul>
+</li>
+<li><a href="#schema">Schema</a>
+<ul class="sectlevel2">
+<li><a href="#openapi-文档结构">OpenAPI 文档结构</a></li>
+<li><a href="#info-object">Info Object</a></li>
+<li><a href="#server-object">Server Object</a></li>
+<li><a href="#server-variable-object">Server Variable Object</a></li>
+<li><a href="#paths-object">Paths Object</a></li>
+<li><a href="#path-item-object">Path Item Object</a></li>
+<li><a href="#external-documentation-object">External Documentation Object</a></li>
+<li><a href="#components-object">Components Object</a></li>
+<li><a href="#components-示例">Components 示例</a></li>
+</ul>
+</li>
+<li><a href="#appxa">Appendix A: OAS formats</a></li>
+</ul>          </p>
+        </aside>
+      </div>
+    </div>
+
+    
+  </body>
+</html>
