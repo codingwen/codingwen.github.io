@@ -1,0 +1,78 @@
+= OAS Spec
+:page-title: "OAS spec"
+:page-layout: post
+:page-permalink: oas-spect.html
+:page-date:   2020-06-28 21:19:40 +0800
+:page-categories: openapi swagger
+
+== OAS 介绍
+
+
+[quote, oas specification]
+____
+The OpenAPI Specification (OAS) defines a standard, language-agnostic interface to RESTful APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code, documentation, or through network traffic inspection. When properly defined, a consumer can understand and interact with the remote service with a minimal amount of implementation logic.
+
+An OpenAPI definition can then be used by documentation generation tools to display the API, code generation tools to generate servers and clients in various programming languages, testing tools, and many other use cases.
+____
+
+The OpenAPI Specification(OAS)的目标是针对RESTful API，定义标准的、与实现语言无关的接口，同时允许计算机和人都能够理解与发现，无需阅读源码。
+
+////
+概览
+////
+include::_chp01.adoc[]
+
+
+== Schema
+////
+OpenAPI Object
+////
+include::_chp02.adoc[leveloffset=+1]
+
+////
+Info Object
+////
+include::_chp03.adoc[leveloffset=+1]
+
+////
+Server Object
+////
+include::_chp04.adoc[leveloffset=+1]
+
+
+////
+Server Variable Object
+////
+include::_chp05.adoc[leveloffset=+1]
+
+////
+Paths Object
+////
+include::_chp06.adoc[leveloffset=+1]
+
+////
+Path Item Object
+////
+include::_chp07.adoc[leveloffset=+1]
+
+////
+External Documentation Object
+////
+include::_chp08.adoc[leveloffset=+1]
+
+
+////
+Components Object
+////
+include::_chp09.adoc[leveloffset=+1]
+
+
+////
+Components Example
+////
+include::_chp10.adoc[leveloffset=+1]
+
+
+[#appxa, reftext=formats]
+[appendix]
+include::_appdx01.adoc[leveloffset=+1]

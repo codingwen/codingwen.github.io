@@ -1,0 +1,36 @@
+== Paths Object
+
+
+.Paths Object 结构如下
+====
+[src, yml]
+----
+paths:
+  /path1:                   <1>
+    get:                    <2>
+      description: xxx      <3>
+      summary: xxx          <4>
+      tags: []              <5>
+      operationId: xxx      <6>
+      parameters:           <7>
+      requestBody: {}       <8>
+      responses: []         <9>
+      security: []          <10>
+    post: 
+    put:
+  path2:
+    get:
+    post:
+    put:  
+----
+<1> 接口路径
+<2> 接口Http方法
+<3> 接口详细说明
+<4> 接口简略说明
+<5> 接口标签
+<6> 接口ID
+<7> 请求参数
+<8> 请求体
+<9> 响应体
+<10> 安全需求
+====

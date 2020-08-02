@@ -1,0 +1,78 @@
+== Server Variable Object
+
+An object representing a Server Variable for server URL template substitution.
+
+
+.Fix Fields
+[cols="1,1,1,3", options="header"]
+|===
+|Field Name
+|Type
+|Required
+|Description
+
+|enum
+|``[string]``
+|N
+|An enumeration of string values to be used if the substitution options are from a limited set. The array SHOULD NOT be empty.
+
+|default
+|string
+|Y
+|The default value to use for substitution, which SHALL be sent if an alternate value is not supplied. 
+
+|description
+|string
+|N
+|An optional description for the server variable.
+|===
+
+.Server Variables Examples
+====
+[src,json]
+----
+{
+  "servers": [
+    {
+      "url": "https://{username}.gigantic-server.com:{port}/{basePath}",
+      "description": "The production API server",
+      "variables": {
+        "username": {
+          "default": "demo",
+          "description": "this value is assigned by the service provider, in this example `gigantic-server.com`"
+        },
+        "port": {
+          "enum": [
+            "8443",
+            "443"
+          ],
+          "default": "8443"
+        },
+        "basePath": {
+          "default": "v2"
+        }
+      }
+    }
+  ]
+}
+----
+[src,yml]
+----
+servers:
+- url: https://{username}.gigantic-server.com:{port}/{basePath}
+  description: The production API server
+  variables:
+    username:
+      # note! no enum here means it is an open value
+      default: demo
+      description: this value is assigned by the service provider, in this example `gigantic-server.com`
+    port:
+      enum:
+        - '8443'
+        - '443'
+      default: '8443'
+    basePath:
+      # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v2`
+      default: v2
+----
+====

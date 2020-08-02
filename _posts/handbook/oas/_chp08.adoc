@@ -1,0 +1,39 @@
+== External Documentation Object
+
+Allows referencing an external resource for extended documentation.
+
+
+.Fix Fields
+[cols="1,1,1,3", options="header"]
+|===
+|Field Name
+|Type
+|Required
+|Description
+
+|description
+|string
+|N
+|A short description of the target documentation.
+
+|url
+|string
+|Y
+| The URL for the target documentation. 
+|===
+
+.External Documentation Object Example
+====
+[src,json]
+----
+{
+  "description": "Find more info here",
+  "url": "https://example.com"
+}
+----
+[src,yml]
+----
+description: Find more info here
+url: https://example.com
+----
+====

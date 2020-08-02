@@ -1,0 +1,58 @@
+== 概览
+
+link:https://swagger.io/specification/[OAS]的规格包含如下元素
+
+. Versions
+. Format
+. Document Types
+. Rich Text Formatting
+. Relative References in
+. URLs
+. Schema
+. Specification Extensions
+. Security Filtering
+
+=== Versions
+
+OAS 的version属性遵循link:https://semver.org/spec/v2.0.0.html[Semantic Versioning 2.0.0]规范，采用##MAJOR.MINOR.PATCH##形式
+
+=== Format
+
+OpenAPI Specification规定Open API document应该是一个JSON对象，在展现形式上可以是json或者yaml文件格式。
+
+所有属性名称是大小写有别的。
+
+而schema的属性(field)有两种类型: 
+
+- 固定(fixed)
+- 模式(patterned)
+
+后者在包含的对象中必须拥有唯一的名称。
+
+=== 文档结构(Document Structure)
+
+OpenAPI文档可以是单一文档，也可以由作者根据意愿分为多个部分后组成一个文档，通过使用##$ref##属性引用相关的部分。
+
+所有这些文档必须符合link:https://json-schema.org/[Json Schema]的定义
+
+=== 数据类型(Data Types)
+
+基本数据类型基于link:https://tools.ietf.org/html/draft-wright-json-schema-00#section-4.2[ JSON Schema Specification Wright Draft 00]。
+
+[NOTE]
+integer属性是是没有小数或者指数的JSON number.
+##null## 不属于类型
+而##Model##则使用link:https://swagger.io/specification/#schema-object[Schema Object]定义
+
+基本类型具有可选的修饰符: ##format##
+
+OAS的定义见附件A
+
+=== 多样文本格式(Rich Text Formatting)
+
+在OAS的定义中，##description##需要支持符合CommonMark语义的markdown格式。
+
+=== URLs中的相关引用(Relative References in URLs)
+
+相关引用使用##$ref##，会被当作link:https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03[JSON Reference]进行处理
+

@@ -1,0 +1,159 @@
+== Path Item Object
+
+Describes the operations available on a single path. A Path Item MAY be empty, due to ACL constraints. The path itself is still exposed to the documentation viewer but they will not know which operations and parameters are available.
+
+
+.Fix Fields
+[cols="1,1,3", options="header"]
+|===
+|Field Name
+|Type
+|Description
+
+|``$ref``
+|string
+|Allows for an external definition of this path item. The referenced structure MUST be in the format of a Path Item Object. In case a Path Item Object field appears both in the defined object and the referenced object, the behavior is undefined.
+
+|summary
+|string
+|An optional, string summary, intended to apply to all operations in this path.
+
+|description
+|string
+|An optional, string description, intended to apply to all operations in this path. CommonMark syntax MAY be used for rich text representation.
+
+|get
+|Operation Object
+|A definition of a GET operation on this path.
+
+|put
+|Operation Object
+|A definition of a PUT operation on this path.
+
+|post
+|Operation Object
+|A definition of a POST operation on this path.
+
+|delete
+|Operation Object
+|A definition of a DELETE operation on this path.
+
+|options
+|Operation Object
+|A definition of a OPTIONS operation on this path.
+
+|head
+|Operation Object
+|A definition of a HEAD operation on this path.
+
+|patch
+|Operation Object
+|A definition of a PATCH operation on this path.
+
+|trace
+|Operation Object
+|A definition of a TRACE operation on this path.
+
+|servers
+|[Server Object]
+|An alternative server array to service all operations in this path.
+
+|parameters
+|[Parameter Object \| Reference Object]
+|A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters.
+
+|===
+
+.Path Item Object Example
+====
+[src,json]
+----
+{
+  "get": {
+    "description": "Returns pets based on ID",
+    "summary": "Find pets by ID",
+    "operationId": "getPetsById",
+    "responses": {
+      "200": {
+        "description": "pet response",
+        "content": {
+          "*/*": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        }
+      },
+      "default": {
+        "description": "error payload",
+        "content": {
+          "text/html": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": [
+    {
+      "name": "id",
+      "in": "path",
+      "description": "ID of pet to use",
+      "required": true,
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "style": "simple"
+    }
+  ]
+}
+----
+[src,yml]
+----
+get:         <1>
+  description: Returns pets based on ID
+  summary: Find pets by ID   <2>
+  operationId: getPetsById   <3>
+  responses:
+    '200':                   <4>
+      description: pet response
+      content:
+        '*/*' :              <5>
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'   <6>
+    default:                                     <7>
+      description: error payload
+      content:
+        'text/html':
+          schema:
+            $ref: '#/components/schemas/ErrorModel'
+parameters:                    <8>
+- name: id
+  in: path
+  description: ID of pet to use
+  required: true
+  schema:
+    type: array
+    items:
+      type: string  
+  style: simple
+----
+<1> Http方法
+<2> 接口名称
+<3> 接口ID
+<4> 响应状态码
+<5> MediaType
+<6> 引用
+<7> 默认响应
+<8> 参数
+====

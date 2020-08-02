@@ -1,0 +1,77 @@
+== Server Object
+
+An object representing a Server.
+
+
+.Fix Fields
+[cols="1,1,1,3", options="header"]
+|===
+|Field Name
+|Type
+|Required
+|Description
+
+|url
+|string
+|Y
+|A URL to the target host. This URL supports Server Variables and MAY be relative, to indicate that the host location is relative to the location where the OpenAPI document is being served. Variable substitutions will be made when a variable is named in ``{brackets}``.
+
+|description
+|string
+|N
+|An optional string describing the host designated by the URL. CommonMark syntax MAY be used for rich text representation.
+
+|variables
+|Map[string, Server Variable Object]
+|N
+|A map between a variable name and its value. The value is used for substitution in the server's URL template.
+|===
+
+.Server Object Example
+====
+[src,json]
+----
+{
+  "url": "https://development.gigantic-server.com/v1",
+  "description": "Development server"
+}
+----
+[src,yml]
+----
+url: https://development.gigantic-server.com/v1
+description: Development server
+----
+====
+
+.Multiple Server Object Example
+====
+[src, json]
+----
+{
+  "servers": [
+    {
+      "url": "https://development.gigantic-server.com/v1",
+      "description": "Development server"
+    },
+    {
+      "url": "https://staging.gigantic-server.com/v1",
+      "description": "Staging server"
+    },
+    {
+      "url": "https://api.gigantic-server.com/v1",
+      "description": "Production server"
+    }
+  ]
+}
+----
+[src, yml]
+----
+servers:
+- url: https://development.gigantic-server.com/v1
+  description: Development server
+- url: https://staging.gigantic-server.com/v1
+  description: Staging server
+- url: https://api.gigantic-server.com/v1
+  description: Production server
+----
+====
